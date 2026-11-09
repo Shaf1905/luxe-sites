@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Halcyon · Calm Skincare</title>
+<meta name="description" content="Fragrance-free skincare for reactive skin. Build an AM or PM routine in four steps.">
+<meta name="theme-color" content="#EDF5F4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%2312282A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23EDF5F4' stroke-width='1.6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!--
+  SHOPIFY PORTING MAP (Online Store 2.0)
+  .announcement-bar -> sections/announcement-bar.liquid · header -> sections/header.liquid
+  [data-section="hero"] -> sections/image-banner.liquid (image_picker + text blocks)
+  [data-section="collection"] -> sections/featured-collection.liquid (PRODUCTS mirrors product JSON; prices in cents)
+  [data-section="routine"] -> sections/routine-builder.liquid (block per step, product setting per block; add all via /cart/add.js items[])
+  [data-section="ingredients"] -> sections/multicolumn.liquid · #cartDrawer -> snippets/cart-drawer.liquid
+-->
+<style>
+html,body{background:#EDF5F4;color:#12282A}
+:root{--bg:#EDF5F4;--card:#F8FBFB;--ink:#12282A;--muted:rgba(18,40,42,.64);--faint:rgba(18,40,42,.42);--line:rgba(18,40,42,.12);--accent:#1F7A78;
+  --sans:'Manrope',system-ui,sans-serif;--ease:cubic-bezier(.16,1,.3,1);--gut:clamp(20px,4vw,56px)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip;letter-spacing:-.005em}
+::selection{background:rgba(31,122,120,.22)}
+a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.page-width{max-width:1360px;margin:0 auto;padding:0 var(--gut)}
+.label{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3{font-weight:400;letter-spacing:-.035em}
+h2{font-size:clamp(38px,4.6vw,66px);line-height:1.02}
+h2 span{color:var(--faint)}
+
+.announcement-bar{background:var(--ink);color:rgba(237,245,244,.8);font-size:12px;text-align:center;padding:9px 16px;letter-spacing:.02em}
+.site-header{position:sticky;top:0;z-index:20;background:rgba(237,245,244,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid transparent;transition:border-color .3s}
+.site-header.stuck{border-color:var(--line)}
+.header__inner{display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{font-size:22px;font-weight:500;letter-spacing:-.04em;display:flex;align-items:center;gap:8px}
+.logo i{width:14px;height:14px;border-radius:50%;border:1.6px solid var(--ink)}
+.header__nav{display:flex;gap:6px;background:rgba(255,255,255,.55);padding:5px;border-radius:999px}
+.header__nav a{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:500;color:var(--muted);transition:background .25s,color .25s}
+.header__nav a:hover{background:#fff;color:var(--ink)}
+.cart-btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:999px;background:var(--ink);color:#fff;font-size:13px;font-weight:600}
+.cart-btn b{min-width:20px;height:20px;border-radius:10px;background:#fff;color:var(--ink);font-size:11px;display:grid;place-items:center}
+.cart-btn.bump b{animation:bump .45s var(--ease)} @keyframes bump{40%{transform:scale(1.35)}}
+
+/* HERO */
+.hero{padding:16px var(--gut) 0}
+.hero__frame{position:relative;max-width:1400px;margin:0 auto;border-radius:36px;overflow:hidden;height:calc(100vh - 140px);height:calc(100dvh - 140px);min-height:560px;max-height:860px;background:#d3dfe6}
+/* hero visual: a drop falls from the pipette into calm water */
+.hero__frame{background:radial-gradient(ellipse 80% 70% at 72% 40%,#F4FBFA 0%,#DCEFEC 45%,#C9E4E0 100%)}
+.drop-scene{position:absolute;top:0;right:0;bottom:0;width:66%;height:100%}
+.drop-scene .ripple{fill:none;stroke:#fff;stroke-width:2;transform-box:fill-box;transform-origin:center;opacity:0;animation:ripple 3.6s cubic-bezier(.2,.6,.3,1) infinite}
+.drop-scene .ripple.r2{animation-delay:.45s;stroke-width:1.5} .drop-scene .ripple.r3{animation-delay:.9s;stroke-width:1}
+@keyframes ripple{0%,24%{opacity:0;transform:scale(.08)}27%{opacity:.95}100%{opacity:0;transform:scale(1)}}
+.drop-scene .drop{transform-box:fill-box;animation:fall 3.6s cubic-bezier(.55,0,1,.45) infinite}
+@keyframes fall{0%{transform:translateY(0) scale(.2);opacity:0}6%{opacity:1;transform:translateY(0) scale(.6)}14%{transform:translateY(0) scale(1)}25%{transform:translateY(222px) scale(1,1.15);opacity:1}26%,100%{transform:translateY(222px) scale(1);opacity:0}}
+.drop-scene .splash{transform-box:fill-box;transform-origin:center bottom;opacity:0;animation:splash 3.6s ease-out infinite}
+@keyframes splash{0%,25%{opacity:0;transform:scaleY(.2)}29%{opacity:.9;transform:scaleY(1)}40%{opacity:0;transform:scaleY(.6)}100%{opacity:0}}
+.drop-scene .float{animation:bob 6s ease-in-out infinite;transform-box:fill-box}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.hero__frame::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(237,245,244,.92) 0%,rgba(237,245,244,.55) 38%,transparent 62%)}
+.hero__content{position:absolute;z-index:2;left:clamp(24px,5vw,72px);bottom:clamp(28px,6vh,64px);max-width:560px}
+.hero h1{font-size:clamp(50px,6.4vw,104px);line-height:.96;margin:16px 0 22px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:17px;max-width:27rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:52px;padding:0 26px;border-radius:999px;font-size:14px;font-weight:600;transition:background .3s,color .3s,transform .15s,box-shadow .3s}
+.btn:active{transform:scale(.97)}
+.btn--dark{background:var(--ink);color:#fff} .btn--dark:hover{background:var(--accent)}
+.btn--light{background:#fff;color:var(--ink);box-shadow:0 4px 18px rgba(18,40,42,.08)} .btn--light:hover{box-shadow:0 8px 28px rgba(18,40,42,.14)}
+.hero__ctas{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap}
+.hero__chips{position:absolute;z-index:2;right:clamp(20px,3vw,40px);top:clamp(20px,3vw,40px);display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.chip{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:12px;font-weight:600;display:flex;gap:8px;align-items:center}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+
+/* COLLECTION */
+.section{padding:clamp(88px,10vw,140px) 0}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:44px}
+.section-head p{max-width:25rem;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:var(--card);border-radius:28px;padding:14px;display:flex;flex-direction:column;transition:transform .5s var(--ease),box-shadow .5s}
+.card:hover{transform:translateY(-4px);box-shadow:0 20px 50px -20px rgba(18,40,42,.18)}
+.card__media{position:relative;aspect-ratio:1/1.05;border-radius:20px;background:var(--tint);display:grid;place-items:center;overflow:hidden}
+.card__media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
+.card:hover .card__media img{transform:scale(1.05)}
+.step-tag{z-index:1}
+.prod-img{display:block;width:100%;height:100%;object-fit:cover}
+
+.step-tag{position:absolute;top:12px;left:12px;font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.8)}
+.card__body{padding:16px 6px 4px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card__title{font-size:19px;font-weight:500;letter-spacing:-.02em}
+.card__desc{font-size:13.5px;color:var(--muted)}
+.card__foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:14px}
+.card__price{font-weight:600;font-variant-numeric:tabular-nums}
+.card__price small{font-weight:400;color:var(--faint);margin-left:4px}
+.add{width:42px;height:42px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;transition:background .3s,transform .3s var(--ease)}
+.add:hover{background:var(--accent);transform:rotate(90deg)}
+.add.done{background:var(--accent)}
+
+/* ROUTINE */
+.routine{background:var(--ink);color:#EDF5F4;border-radius:40px;margin:0 var(--gut);padding:clamp(48px,6vw,90px) clamp(24px,5vw,80px);display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(30px,6vw,90px)}
+.routine h2 span{color:rgba(237,245,244,.45)}
+.routine .label{color:#8ED3C9}
+.routine p.lead{color:rgba(237,245,244,.7);margin:18px 0 28px;max-width:26rem}
+.toggle{display:inline-flex;background:rgba(237,245,244,.1);border-radius:999px;padding:4px;position:relative}
+.toggle button{position:relative;z-index:1;height:42px;padding:0 24px;border-radius:999px;font-size:14px;font-weight:600;color:rgba(237,245,244,.7);transition:color .3s}
+.toggle button[aria-pressed="true"]{color:var(--ink)}
+.toggle .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;background:#EDF5F4;transition:transform .45s var(--ease)}
+.toggle.pm .pill{transform:translateX(100%)}
+.routine__total{margin-top:34px;padding-top:24px;border-top:1px solid rgba(237,245,244,.14);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.routine__total .sum{font-size:28px;font-weight:500;letter-spacing:-.03em}
+.routine__total .sum s{font-size:16px;color:rgba(237,245,244,.45);margin-left:8px}
+.routine__total .btn--light{color:var(--ink)}
+.steps{list-style:none;display:grid;gap:10px;counter-reset:s}
+.step{display:grid;grid-template-columns:44px 64px 1fr auto;gap:16px;align-items:center;padding:14px 18px 14px 14px;border-radius:22px;background:rgba(237,245,244,.06);border:1px solid rgba(237,245,244,.08);animation:stepIn .55s var(--ease) both}
+@keyframes stepIn{from{opacity:0;transform:translateX(16px)}}
+.step .n{width:36px;height:36px;border-radius:50%;border:1px solid rgba(237,245,244,.25);display:grid;place-items:center;font-size:13px;font-weight:600}
+.step .thumb{height:64px;border-radius:14px;background:var(--tint);display:grid;place-items:center}
+.step .thumb{overflow:hidden} .step .thumb img{width:100%;height:100%;object-fit:cover}
+.step h4{font-size:16px;font-weight:500}
+.step small{color:rgba(237,245,244,.55);font-size:13px}
+.step .price{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* INGREDIENTS */
+.ing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ing{background:var(--card);border-radius:28px;padding:30px;min-height:320px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.ing .pct{font-size:clamp(64px,7vw,104px);font-weight:300;letter-spacing:-.06em;line-height:.9}
+.ing .pct small{font-size:.4em;letter-spacing:-.02em;margin-left:4px}
+.ing h3{font-size:22px;letter-spacing:-.025em;margin-top:auto}
+.ing p{color:var(--muted);font-size:14px;margin-top:6px;max-width:30ch}
+.ing .ring{position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;border:1px solid var(--line)}
+.ing .ring::after{content:"";position:absolute;inset:30px;border-radius:50%;border:1px solid var(--line)}
+.free-from{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.free-from span{padding:9px 16px;border-radius:999px;border:1px solid var(--line);font-size:13px;color:var(--muted)}
+
+/* CTA + FOOTER */
+.cta{text-align:center;padding:clamp(70px,9vw,120px) var(--gut)}
+.cta h2{font-size:clamp(46px,7vw,100px);max-width:13ch;margin:14px auto 18px}
+.cta p{color:var(--muted);max-width:28rem;margin:0 auto 30px}
+.email{display:flex;max-width:440px;margin:0 auto;background:#fff;border-radius:999px;padding:5px;box-shadow:0 4px 18px rgba(18,40,42,.06)}
+.email input{flex:1;min-width:0;width:0;border:0;outline:0;background:none;font:inherit;padding:0 18px}
+.email button{height:46px;padding:0 22px;border-radius:999px;background:var(--ink);color:#fff;font-weight:600;font-size:14px;white-space:nowrap}
+.note{font-size:13px;color:var(--faint);margin-top:12px;min-height:20px}
+footer{border-top:1px solid var(--line);padding:44px 0 max(30px,env(safe-area-inset-bottom))}
+.foot{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:30px;font-size:14px;color:var(--muted)}
+.foot h4{color:var(--ink);font-weight:600;font-size:14px;margin-bottom:10px}
+.foot li{list-style:none;margin-bottom:6px} .foot a:hover{color:var(--ink)}
+.legal{margin-top:36px;font-size:12px;color:var(--faint)}
+
+/* DRAWER */
+.veil{position:fixed;inset:0;z-index:40;background:rgba(18,40,42,.3);opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
+.drawer{position:fixed;top:12px;right:12px;bottom:12px;z-index:41;width:min(400px,calc(100% - 24px));background:#fff;border-radius:28px;display:flex;flex-direction:column;transform:translateX(110%);transition:transform .5s var(--ease);box-shadow:0 30px 80px rgba(18,40,42,.2)}
+.cart-open .veil{opacity:1;visibility:visible} .cart-open .drawer{transform:none} .cart-open{overflow:hidden}
+.drawer__head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px}
+.drawer__head h3{font-size:24px}
+.x{width:40px;height:40px;border-radius:50%;background:var(--bg);display:grid;place-items:center}
+.drawer__items{flex:1;overflow:auto;padding:0 24px}
+.line{display:grid;grid-template-columns:60px 1fr auto;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.line .thumb{height:60px;border-radius:14px;background:var(--tint);display:grid;place-items:center} .line .thumb{overflow:hidden} .line .thumb img{width:100%;height:100%;object-fit:cover}
+.line h4{font-size:15px;font-weight:500} .line small{color:var(--faint)}
+.qty{display:inline-flex;align-items:center;gap:4px;margin-top:6px;background:var(--bg);border-radius:999px}
+.qty button{width:28px;height:28px} .qty span{min-width:16px;text-align:center;font-size:13px}
+.empty{color:var(--faint);padding:30px 0;text-align:center}
+.drawer__foot{padding:20px 24px 24px;border-top:1px solid var(--line)}
+.subtotal{display:flex;justify-content:space-between;font-weight:600;margin-bottom:14px}
+.drawer__foot .btn{width:100%}
+
+.rv{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)} .rv.in{opacity:1;transform:none}
+.js-off .rv{opacity:1;transform:none}
+
+@media (max-width:1024px){ .grid{grid-template-columns:repeat(2,1fr)} .header__nav{display:none} .routine{grid-template-columns:1fr} }
+@media (max-width:760px){
+  .hero__frame::after{background:linear-gradient(0deg,rgba(237,245,244,.96) 0%,rgba(237,245,244,.75) 45%,transparent 75%)}
+  .drop-scene{width:100%;height:46%;top:8px} .hero__chips{display:none}
+  .ing-grid{grid-template-columns:1fr} .ing{min-height:240px}
+  .section-head{flex-direction:column;align-items:start} .foot{grid-template-columns:1fr 1fr}
+  .step{grid-template-columns:36px 52px 1fr;gap:12px} .step .price{grid-column:3;justify-self:start;margin-top:-8px}
+  .step .thumb{height:52px}
+}
+@media (max-width:480px){ .grid{gap:10px} .card{padding:10px;border-radius:22px} .card__title{font-size:16px} .hero__ctas .btn{flex:1;padding:0 16px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important} .rv{opacity:1;transform:none} .drop-scene .ripple{opacity:.6;transform:scale(.6)} .drop-scene .drop{opacity:0}}
+</style>
+</head>
+<body class="js-off">
+<div class="announcement-bar">Free samples of our two newest serums with every order over $60</div>
+<header class="site-header" id="header">
+  <div class="header__inner page-width">
+    <a href="#" class="logo" aria-label="Halcyon home"><i></i>halcyon</a>
+    <nav class="header__nav" aria-label="Primary"><a href="#collection">Shop</a><a href="#routine">Routines</a><a href="#ingredients">Ingredients</a><a href="#journal">About</a></nav>
+    <button class="cart-btn" id="cartBtn" aria-label="Open bag">Bag <b id="cartCount">0</b></button>
+  </div>
+</header>
+
+<main>
+<section class="hero" data-section="hero" aria-labelledby="heroH">
+  <div class="hero__frame">
+    <svg class="drop-scene" viewBox="0 0 800 640" preserveAspectRatio="xMidYMin meet" role="img" aria-label="A drop of Barrier Serum falling into calm water beside the bottle">
+      <defs>
+        <radialGradient id="pool" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#A9D8D1" stop-opacity=".75"/><stop offset=".6" stop-color="#BFE2DC" stop-opacity=".45"/><stop offset="1" stop-color="#C9E4E0" stop-opacity="0"/></radialGradient>
+        <linearGradient id="glassT" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".3" stop-color="#fff" stop-opacity=".25"/><stop offset=".75" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity=".6"/></linearGradient>
+        <linearGradient id="serum" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9FD9CF"/><stop offset="1" stop-color="#5DB5A8"/></linearGradient>
+        <radialGradient id="dropG" cx=".35" cy=".35"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#BDEBE3"/><stop offset="1" stop-color="#6CC2B5"/></radialGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10"/></filter>
+      </defs>
+      <!-- water surface -->
+      <ellipse cx="400" cy="500" rx="380" ry="86" fill="url(#pool)"/>
+      <ellipse cx="400" cy="500" rx="260" ry="52" class="ripple"/>
+      <ellipse cx="400" cy="500" rx="260" ry="52" class="ripple r2"/>
+      <ellipse cx="400" cy="500" rx="260" ry="52" class="ripple r3"/>
+      <path class="splash" d="M392 498 Q396 470 400 462 Q404 470 408 498 Z" fill="#fff" opacity=".8"/>
+      <!-- pipette -->
+      <g class="float">
+        <rect x="378" y="40" width="44" height="78" rx="22" fill="#12282A"/>
+        <rect x="384" y="112" width="32" height="18" rx="4" fill="#12282A"/>
+        <path d="M388 130 H412 V236 Q412 252 400 268 Q388 252 388 236 Z" fill="url(#glassT)" stroke="#12282A" stroke-opacity=".18"/>
+        <path d="M391 176 H409 V236 Q409 250 400 262 Q391 250 391 236 Z" fill="url(#serum)" opacity=".85"/>
+        <rect x="392" y="136" width="3" height="96" rx="1.5" fill="#fff" opacity=".8"/>
+      </g>
+      <!-- falling drop -->
+      <path class="drop" d="M400 262 C400 262 388 280 388 290 A12 12 0 0 0 412 290 C412 280 400 262 400 262 Z" fill="url(#dropG)"/>
+      <!-- serum bottle standing in the water -->
+      <ellipse cx="612" cy="520" rx="70" ry="13" fill="#5DB5A8" opacity=".25" filter="url(#soft)"/>
+      <g>
+        <rect x="560" y="300" width="104" height="216" rx="22" fill="url(#serum)" opacity=".55"/>
+        <rect x="560" y="300" width="104" height="216" rx="22" fill="url(#glassT)" stroke="#12282A" stroke-opacity=".15"/>
+        <rect x="586" y="252" width="52" height="50" rx="4" fill="#12282A"/>
+        <rect x="574" y="372" width="76" height="70" rx="4" fill="#F8FBFB"/>
+        <text x="612" y="402" text-anchor="middle" font-family="Manrope" font-weight="600" font-size="13" fill="#12282A">halcyon</text>
+        <text x="612" y="422" text-anchor="middle" font-family="Manrope" font-size="6.4" letter-spacing=".8" fill="#12282A" opacity=".7">BARRIER SERUM</text>
+        <rect x="570" y="312" width="7" height="190" rx="3.5" fill="#fff" opacity=".7"/>
+      </g>
+      <!-- reflection -->
+      <rect x="560" y="520" width="104" height="60" rx="18" fill="url(#serum)" opacity=".12"/>
+      <!-- floating bubbles -->
+      <circle cx="250" cy="380" r="6" fill="#fff" opacity=".7" class="float"/>
+      <circle cx="210" cy="300" r="3.5" fill="#fff" opacity=".6" class="float" style="animation-delay:-2s"/>
+      <circle cx="700" cy="220" r="5" fill="#fff" opacity=".6" class="float" style="animation-delay:-4s"/>
+    </svg>
+    <div class="hero__chips" aria-hidden="true"><span class="chip"><i></i>Fragrance-free</span><span class="chip"><i></i>pH 5.5</span><span class="chip"><i></i>Derm-tested on reactive skin</span></div>
+    <div class="hero__content">
+      <p class="label">Skincare for reactive skin</p>
+      <h1 id="heroH">Calm skin is<br><span>the whole point.</span></h1>
+      <p>Four steps, short ingredient lists and nothing that stings. Built with dermatologists for skin that reacts to everything else.</p>
+      <div class="hero__ctas"><a href="#routine" class="btn btn--dark">Build your routine</a><a href="#collection" class="btn btn--light">Shop bestsellers</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="collection" data-section="collection" aria-labelledby="colH">
+  <div class="page-width">
+    <div class="section-head rv"><div><p class="label">The collection</p><h2 id="colH" style="margin-top:12px">Four steps.<br><span>Nothing extra.</span></h2></div><p>Every formula is fragrance-free, essential-oil-free and tested on people with eczema and rosacea.</p></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<section id="routine" data-section="routine" aria-labelledby="rH">
+  <div class="routine rv">
+    <div>
+      <p class="label">Routine builder</p>
+      <h2 id="rH" style="margin-top:12px">Morning or night,<br><span>in that order.</span></h2>
+      <p class="lead">Pick a routine and we'll lay out the steps. Buy the full set and save 15%.</p>
+      <div class="toggle" id="toggle" role="group" aria-label="Routine time"><span class="pill"></span><button aria-pressed="true" data-r="am">Morning</button><button aria-pressed="false" data-r="pm">Evening</button></div>
+      <div class="routine__total"><div class="sum" id="sum">$0</div><button class="btn btn--light" id="addRoutine">Add routine to bag</button></div>
+    </div>
+    <ol class="steps" id="steps" aria-live="polite"></ol>
+  </div>
+</section>
+
+<section class="section" id="ingredients" data-section="ingredients" aria-labelledby="iH">
+  <div class="page-width">
+    <div class="section-head rv"><div><p class="label">What's inside</p><h2 id="iH" style="margin-top:12px">Three hard workers.<br><span>No fillers.</span></h2></div><p>We print every percentage on the bottle, because you should know exactly what you're putting on your face.</p></div>
+    <div class="ing-grid">
+      <article class="ing rv"><span class="ring"></span><div class="pct">4<small>%</small></div><h3>Niacinamide</h3><p>Strengthens the skin barrier and evens out redness without the flush that higher strengths cause.</p></article>
+      <article class="ing rv"><span class="ring"></span><div class="pct">0.5<small>%</small></div><h3>Ectoin</h3><p>A molecule from desert microbes that shields skin from heat, wind and pollution.</p></article>
+      <article class="ing rv"><span class="ring"></span><div class="pct">8<small>%</small></div><h3>Olive squalane</h3><p>Matches your skin's own oils, so it moisturises without clogging or feeling greasy.</p></article>
+    </div>
+    <div class="free-from rv"><span>No fragrance</span><span>No essential oils</span><span>No drying alcohol</span><span>No sulfates</span><span>Vegan</span><span>Recyclable aluminium</span></div>
+  </div>
+</section>
+
+<section class="cta" id="journal" aria-labelledby="cH">
+  <p class="label rv">Skin notes</p>
+  <h2 id="cH" class="rv">Fewer products, <span style="color:var(--accent)">better skin.</span></h2>
+  <p class="rv">One email a month from our dermatologists on what works for reactive skin, and what doesn't. 10% off your first order.</p>
+  <form class="email rv" id="nl"><label for="nlE" style="position:absolute;left:-9999px">Email</label><input id="nlE" type="email" placeholder="Your email" required><button>Get 10% off</button></form>
+  <p class="note" id="nlNote" aria-live="polite"></p>
+</section>
+</main>
+
+<footer><div class="page-width">
+  <div class="foot">
+    <div><span class="logo"><i></i>halcyon</span><p style="margin-top:12px;max-width:22rem">Skincare for skin that reacts. Formulated in Copenhagen.</p></div>
+    <div><h4>Shop</h4><ul><li><a href="#collection">All products</a></li><li><a href="#routine">Routines</a></li><li><a href="#">Travel sizes</a></li></ul></div>
+    <div><h4>Learn</h4><ul><li><a href="#ingredients">Ingredients</a></li><li><a href="#">Skin quiz</a></li><li><a href="#">Journal</a></li></ul></div>
+    <div><h4>Help</h4><ul><li><a href="#">Shipping</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact</a></li></ul></div>
+  </div>
+  <p class="legal">© 2026 Halcyon Skin ApS</p>
+</div></footer>
+
+<div class="veil" id="veil"></div>
+<aside class="drawer" id="drawer" aria-label="Your bag" aria-hidden="true">
+  <div class="drawer__head"><h3>Your bag</h3><button class="x" id="closeCart" aria-label="Close bag"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="drawer__items" id="items"></div>
+  <div class="drawer__foot"><div class="subtotal"><span>Subtotal</span><span id="subtotal">$0</span></div><button class="btn btn--dark" id="checkout">Checkout</button></div>
+</aside>
+
+<script>
+(() => {
+  const d = document; d.body.classList.remove('js-off');
+  const PRODUCTS = [
+    {handle:'cloud-cleanser', title:'Cloud Cleanser', desc:'Low-foam gel that leaves skin soft, not tight.', size:'150 ml', price:2600, tint:'#DCE7EC', pack:'tube', step:'Step 1'},
+    {handle:'barrier-serum', title:'Barrier Serum', desc:'4% niacinamide and ectoin for redness.', size:'30 ml', price:4200, tint:'#E4E2EC', pack:'dropper', step:'Step 2'},
+    {handle:'still-cream', title:'Still Cream', desc:'Squalane moisturiser that calms within minutes.', size:'50 ml', price:3800, tint:'#E9E4DC', pack:'jar', step:'Step 3'},
+    {handle:'veil-spf', title:'Veil SPF 50', desc:'Mineral sunscreen, no white cast, no sting.', size:'50 ml', price:3400, tint:'#E2EBE2', pack:'pump', step:'Step 4'},
+    {handle:'night-balm', title:'Night Balm', desc:'Overnight repair with ceramides and oat.', size:'50 ml', price:4600, tint:'#E3E0E8', pack:'jar', step:'Night'},
+  ];
+  const ROUTINES = {am:['cloud-cleanser','barrier-serum','still-cream','veil-spf'], pm:['cloud-cleanser','barrier-serum','night-balm']};
+  const all = Object.fromEntries(PRODUCTS.map(p => [p.handle, p]));
+  const money = c => '$' + (c/100).toFixed(c % 100 ? 2 : 0);
+  /* realistic 3D renders in products/ (swap for your photography) */
+  const IMG = {'cloud-cleanser':'cleanser','barrier-serum':'serum','still-cream':'cream','veil-spf':'spf','night-balm':'balm'};
+  const art = p => `<img class="prod-img" src="products/${IMG[p.handle]}.webp" alt="${p.title}" loading="lazy" decoding="async">`;
+
+  d.getElementById('grid').innerHTML = PRODUCTS.slice(0,4).map(p => `
+    <article class="card rv"><div class="card__media" style="--tint:${p.tint}"><span class="step-tag">${p.step}</span>${art(p)}</div>
+      <div class="card__body"><h3 class="card__title">${p.title}</h3><p class="card__desc">${p.desc}</p>
+        <div class="card__foot"><span class="card__price">${money(p.price)}<small>${p.size}</small></span>
+        <button class="add" data-add="${p.handle}" aria-label="Add ${p.title} to bag"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button></div></div></article>`).join('');
+
+  /* routine builder */
+  let mode = 'am';
+  function renderRoutine(){
+    const list = ROUTINES[mode], full = list.reduce((a,h) => a + all[h].price, 0);
+    d.getElementById('steps').innerHTML = list.map((h,i) => { const p = all[h]; return `<li class="step" style="animation-delay:${i*.07}s"><span class="n">${i+1}</span><span class="thumb" style="--tint:${p.tint}">${art(p)}</span><div><h4>${p.title}</h4><small>${p.desc}</small></div><span class="price">${money(p.price)}</span></li>`; }).join('');
+    d.getElementById('sum').innerHTML = `${money(Math.round(full*.85))}<s>${money(full)}</s>`;
+  }
+  d.querySelectorAll('#toggle button').forEach(b => b.onclick = () => { mode = b.dataset.r; d.getElementById('toggle').classList.toggle('pm', mode === 'pm');
+    d.querySelectorAll('#toggle button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderRoutine(); });
+  renderRoutine();
+
+  /* cart (Shopify: POST /cart/add.js with items[]) */
+  let cart = []; try { cart = JSON.parse(localStorage.getItem('hc-cart') || '[]'); } catch(e) {}
+  const save = () => { try { localStorage.setItem('hc-cart', JSON.stringify(cart)); } catch(e) {} };
+  function render(bump){
+    const n = cart.reduce((a,l) => a + l.qty, 0), btn = d.getElementById('cartBtn');
+    d.getElementById('cartCount').textContent = n; btn.setAttribute('aria-label', `Open bag, ${n} items`);
+    if (bump) { btn.classList.remove('bump'); void btn.offsetWidth; btn.classList.add('bump'); }
+    d.getElementById('items').innerHTML = cart.length ? cart.map((l,i) => { const p = all[l.h]; return `<div class="line"><span class="thumb" style="--tint:${p.tint}">${art(p)}</span><div><h4>${p.title}</h4><small>${p.size}${l.disc ? ' · routine −15%' : ''}</small><br><span class="qty"><button data-q="${i}" data-d="-1" aria-label="Decrease">−</button><span>${l.qty}</span><button data-q="${i}" data-d="1" aria-label="Increase">+</button></span></div><span>${money(Math.round(p.price*(l.disc?.85:1))*l.qty)}</span></div>`; }).join('') : '<p class="empty">Your bag is empty.</p>';
+    d.getElementById('subtotal').textContent = money(cart.reduce((a,l) => a + Math.round(all[l.h].price*(l.disc?.85:1))*l.qty, 0));
+  }
+  const add = (h, disc) => { const l = cart.find(l => l.h === h && !!l.disc === !!disc); l ? l.qty++ : cart.push({h, qty:1, disc}); };
+  const open = o => { d.body.classList.toggle('cart-open', o); d.getElementById('drawer').setAttribute('aria-hidden', !o); };
+  d.addEventListener('click', e => {
+    const a = e.target.closest('[data-add]'); if (a) { add(a.dataset.add); save(); render(true); a.classList.add('done'); setTimeout(() => a.classList.remove('done'), 1200); }
+    const q = e.target.closest('[data-q]'); if (q) { const l = cart[+q.dataset.q]; l.qty += +q.dataset.d; if (l.qty < 1) cart.splice(+q.dataset.q,1); save(); render(); }
+  });
+  d.getElementById('addRoutine').onclick = () => { ROUTINES[mode].forEach(h => add(h, true)); save(); render(true); open(true); };
+  d.getElementById('cartBtn').onclick = () => open(true);
+  d.getElementById('closeCart').onclick = d.getElementById('veil').onclick = () => open(false);
+  addEventListener('keydown', e => e.key === 'Escape' && open(false));
+  d.getElementById('checkout').onclick = e => e.target.textContent = 'Checkout connects on Shopify';
+  render();
+
+  addEventListener('scroll', () => d.getElementById('header').classList.toggle('stuck', scrollY > 20), {passive:true});
+  requestAnimationFrame(() => requestAnimationFrame(() => d.body.classList.add('loaded')));
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { const sib = [...e.target.parentElement.children]; e.target.style.transitionDelay = Math.min(sib.indexOf(e.target),5)*.08 + 's'; e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.1});
+  d.querySelectorAll('.rv').forEach(n => io.observe(n));
+  d.getElementById('nl').onsubmit = e => { e.preventDefault(); d.getElementById('nlNote').textContent = 'Welcome. Your 10% code is on its way.'; };
+})();
+</script>
+</body>
+</html>

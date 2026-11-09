@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sable · Simple Skincare</title>
+<meta name="description" content="Six honest formulas for every skin type. Filter by your skin and read every ingredient in plain English.">
+<meta name="theme-color" content="#F4F0EA">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231D2322'/%3E%3Cpath d='M9 19c3-6 11-6 14 0' stroke='%23F4F0EA' stroke-width='1.8' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<!--
+  WORDPRESS NOTES (block theme + WooCommerce)
+  theme.json presets: --wp--preset--color--{base,contrast,accent,surface}; fonts --wp--preset--font-family--{display,body}.
+  Product grid = WooCommerce Product Collection block; skin-type chips = Product Filters block (filter by attribute "pa_skin-type"); data-skin mirrors the attribute terms.
+  Glossary = core Details blocks (<details class="wp-block-details">), one per ingredient (or a custom post type "ingredient").
+-->
+<style>
+html,body{background:#F4F0EA;color:#1D2322}
+:root{--wp--preset--color--base:#F4F0EA;--wp--preset--color--surface:#FBF9F6;--wp--preset--color--contrast:#1D2322;--wp--preset--color--accent:#3F7366;
+  --muted:rgba(29,35,34,.64);--faint:rgba(29,35,34,.42);--line:rgba(29,35,34,.13);
+  --wp--preset--font-family--display:'DM Serif Display',Georgia,serif;--wp--preset--font-family--body:'DM Sans',system-ui,sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1);--gut:clamp(20px,4vw,56px)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--wp--preset--font-family--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip}
+::selection{background:rgba(63,115,102,.25)}
+a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--wp--preset--color--accent);outline-offset:3px}
+.alignwide{max-width:1320px;margin:0 auto} .has-global-padding{padding-left:var(--gut);padding-right:var(--gut)}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--wp--preset--color--accent)}
+.wp-block-heading{font-family:var(--wp--preset--font-family--display);font-weight:400;letter-spacing:-.015em;line-height:1}
+.wp-block-heading em{color:var(--wp--preset--color--accent)}
+h2.wp-block-heading{font-size:clamp(40px,5vw,72px)}
+.wp-block-button__link{display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 28px;border-radius:999px;font-size:14px;font-weight:600;transition:background .3s,color .3s,transform .15s}
+.wp-block-button__link:active{transform:scale(.97)}
+.is-style-fill .wp-block-button__link{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base)} .is-style-fill .wp-block-button__link:hover{background:var(--wp--preset--color--accent)}
+.is-style-text .wp-block-button__link{padding:0 4px;border-radius:0;height:52px;border-bottom:1.5px solid}
+
+.site-header{position:sticky;top:0;z-index:20;background:rgba(244,240,234,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.site-header .inner{display:flex;align-items:center;justify-content:space-between;height:74px;border-bottom:1px solid var(--line)}
+.wp-block-site-title{font-family:var(--wp--preset--font-family--display);font-size:30px;letter-spacing:-.01em}
+.wp-block-navigation{display:flex;gap:30px;font-size:14px;font-weight:500;color:var(--muted)} .wp-block-navigation a:hover{color:var(--wp--preset--color--contrast)}
+.wc-block-mini-cart{font-size:14px;font-weight:600;display:flex;gap:8px;align-items:center}
+.wc-block-mini-cart b{width:22px;height:22px;border-radius:50%;background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base);font-size:11px;display:grid;place-items:center}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;min-height:calc(100vh - 74px);min-height:calc(100dvh - 74px);padding-top:40px;padding-bottom:60px}
+.hero h1{font-size:clamp(64px,9vw,148px);line-height:.88;margin:20px 0 28px}
+.hero h1 em{display:block}
+.hero p.lead{font-size:18px;color:var(--muted);max-width:29rem;margin-bottom:34px}
+.wp-block-buttons{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.swatches{position:relative;aspect-ratio:1;max-height:72vh;justify-self:center;width:100%}
+.swatch{position:absolute;border-radius:50%;display:grid;place-items:center;transition:transform .8s var(--ease),box-shadow .6s;cursor:default}
+.swatch svg{width:100%;height:100%}
+.swatch:hover{transform:scale(1.06);z-index:3}
+.swatch .tag{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);padding:7px 14px;border-radius:999px;background:var(--wp--preset--color--surface);font-size:12px;font-weight:600;white-space:nowrap;box-shadow:0 6px 20px rgba(29,35,34,.1)}
+.swatch.s1{width:58%;left:0;top:6%} .swatch.s2{width:46%;right:2%;top:0} .swatch.s3{width:44%;right:10%;bottom:2%}
+.swatch.s1{animation:float1 9s ease-in-out infinite} .swatch.s2{animation:float2 11s ease-in-out infinite} .swatch.s3{animation:float1 10s ease-in-out infinite reverse}
+@keyframes float1{50%{translate:0 -10px}} @keyframes float2{50%{translate:0 8px}}
+
+/* products + filter */
+.section{padding-top:clamp(90px,11vw,150px);padding-bottom:clamp(90px,11vw,150px)}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:36px}
+.section-head p{max-width:24rem;color:var(--muted)}
+.wc-block-product-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:34px}
+.filter-chip{height:44px;padding:0 20px;border-radius:999px;border:1.5px solid var(--line);font-size:14px;font-weight:500;transition:all .25s}
+.filter-chip:hover{border-color:var(--wp--preset--color--contrast)}
+.filter-chip[aria-pressed="true"]{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base);border-color:var(--wp--preset--color--contrast)}
+.filter-count{font-size:13px;color:var(--faint);align-self:center;margin-left:auto}
+.wc-block-grid__products{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;list-style:none}
+.wc-block-grid__product{background:var(--wp--preset--color--surface);border-radius:28px;padding:16px 16px 22px;display:flex;flex-direction:column;transition:opacity .4s,transform .5s var(--ease)}
+.wc-block-grid__product.is-hidden{display:none}
+.wc-block-grid__product.pop{animation:pop .5s var(--ease)} @keyframes pop{from{opacity:0;transform:translateY(14px)}}
+.wc-block-grid__product-image{aspect-ratio:1/1;border-radius:18px;background:var(--tint);display:grid;place-items:center;position:relative;overflow:hidden}
+.wc-block-grid__product-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 64%;transition:transform 1s var(--ease)}
+.wc-block-grid__product:hover .wc-block-grid__product-image img{transform:scale(1.05)}
+.wc-block-grid__product-image .smear{position:absolute;right:-8%;bottom:-14%;width:52%;opacity:.9}
+.skin-tags{display:flex;gap:6px;margin:16px 4px 6px;flex-wrap:wrap}
+.skin-tags span{font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(63,115,102,.12);color:var(--wp--preset--color--accent)}
+.wc-block-grid__product-title{font-family:var(--wp--preset--font-family--display);font-weight:400;font-size:26px;margin:4px 4px 4px}
+.wc-block-grid__product-desc{font-size:14px;color:var(--muted);margin:0 4px 16px}
+.wc-block-grid__product-row{display:flex;justify-content:space-between;align-items:center;margin:auto 4px 0}
+.wc-block-grid__product-price{font-weight:600}
+.add_to_cart_button{height:40px;padding:0 18px;border-radius:999px;background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base);font-size:13px;font-weight:600;transition:background .3s}
+.add_to_cart_button:hover,.add_to_cart_button.added{background:var(--wp--preset--color--accent)}
+
+/* glossary */
+.glossary{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(40px,7vw,120px);border-top:1px solid var(--line)}
+.glossary .lead-col{position:sticky;top:110px;align-self:start}
+.glossary .lead-col p{color:var(--muted);margin-top:20px;max-width:26rem}
+.wp-block-details{border-bottom:1px solid var(--line)}
+.wp-block-details:first-child{border-top:1px solid var(--line)}
+.wp-block-details summary{list-style:none;display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;padding:24px 0;cursor:pointer}
+.wp-block-details summary::-webkit-details-marker{display:none}
+.wp-block-details summary h3{font-family:var(--wp--preset--font-family--display);font-weight:400;font-size:clamp(24px,2.4vw,32px)}
+.wp-block-details summary .role{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.wp-block-details summary .pm{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);position:relative;transition:transform .4s var(--ease),background .3s}
+.wp-block-details summary .pm::before,.wp-block-details summary .pm::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:1.5px;background:currentColor;transform:translate(-50%,-50%)}
+.wp-block-details summary .pm::after{transform:translate(-50%,-50%) rotate(90deg);transition:transform .4s var(--ease)}
+.wp-block-details[open] summary .pm{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base);border-color:transparent}
+.wp-block-details[open] summary .pm::after{transform:translate(-50%,-50%) rotate(0)}
+.wp-block-details .body{padding:0 0 26px;color:var(--muted);max-width:52ch;display:grid;gap:10px}
+.wp-block-details .body small{color:var(--faint)}
+
+/* consult cta */
+.consult{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base);border-radius:40px;padding:clamp(44px,7vw,100px);display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:end;position:relative;overflow:hidden}
+.consult h2 em{color:#A8D2C4}
+.consult p{color:rgba(244,240,234,.72);max-width:28rem}
+.consult .wp-block-button__link{background:var(--wp--preset--color--base);color:var(--wp--preset--color--contrast);margin-top:26px}
+.consult .wp-block-button__link:hover{background:#A8D2C4}
+.consult svg.bg{position:absolute;right:-6%;top:-20%;width:46%;opacity:.12}
+.site-footer{padding-top:60px;padding-bottom:max(36px,env(safe-area-inset-bottom))}
+.site-footer .cols{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:30px;font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding-top:44px}
+.site-footer h4{color:var(--wp--preset--color--contrast);font-size:14px;margin-bottom:10px}
+.site-footer li{list-style:none;margin-bottom:6px} .site-footer a:hover{color:var(--wp--preset--color--contrast)}
+.site-footer .legal{margin-top:36px;font-size:12px;color:var(--faint)}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)} .reveal.in{opacity:1;transform:none}
+.no-js .reveal{opacity:1;transform:none}
+
+@media (max-width:960px){
+  .wp-block-navigation{display:none}
+  .hero{grid-template-columns:1fr;min-height:auto} .swatches{max-width:460px}
+  .wc-block-grid__products{grid-template-columns:1fr 1fr}
+  .glossary,.consult{grid-template-columns:1fr} .glossary .lead-col{position:static}
+  .section-head{flex-direction:column;align-items:start} .site-footer .cols{grid-template-columns:1fr 1fr}
+  .filter-count{width:100%;margin:6px 0 0}
+}
+@media (max-width:560px){ .wc-block-grid__products{grid-template-columns:1fr} .wp-block-details summary .role{display:none} .wp-block-details summary{grid-template-columns:1fr auto} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important} .reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body class="no-js">
+<div class="wp-site-blocks">
+<header class="wp-block-template-part site-header"><div class="inner alignwide has-global-padding">
+  <a href="#" class="wp-block-site-title" aria-label="Sable home">Sable</a>
+  <nav class="wp-block-navigation" aria-label="Primary"><a href="#shop">Shop by skin</a><a href="#glossary">Ingredients</a><a href="#consult">Free consult</a></nav>
+  <a href="#shop" class="wc-block-mini-cart">Bag <b id="cc">0</b></a>
+</div></header>
+
+<main>
+<section class="hero alignwide has-global-padding" aria-labelledby="hH">
+  <div>
+    <p class="eyebrow reveal">Six formulas · every skin type</p>
+    <h1 id="hH" class="wp-block-heading reveal">Skin,<em>simply kept.</em></h1>
+    <p class="lead reveal">Sable makes six products and no more. Short ingredient lists, honest percentages, and textures you'll actually look forward to.</p>
+    <div class="wp-block-buttons reveal"><div class="wp-block-button is-style-fill"><a class="wp-block-button__link" href="#shop">Shop by skin type</a></div><div class="wp-block-button is-style-text"><a class="wp-block-button__link" href="#glossary">Read our ingredients</a></div></div>
+  </div>
+  <div class="swatches reveal" aria-hidden="true">
+    <div class="swatch s1"><svg viewBox="0 0 200 200"><defs><radialGradient id="cr" cx=".4" cy=".35"><stop offset="0" stop-color="#FBF8F3"/><stop offset="1" stop-color="#E4DACB"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#cr)"/><path d="M40 110 C60 70 110 60 150 84 C170 96 160 128 128 134 C96 140 70 120 92 104 C108 92 132 100 126 112" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" opacity=".9"/><path d="M40 110 C60 70 110 60 150 84" fill="none" stroke="#D5C8B4" stroke-width="3" stroke-linecap="round" opacity=".7"/></svg><span class="tag">Cream · Daily Moisture</span></div>
+    <div class="swatch s2"><svg viewBox="0 0 200 200"><defs><radialGradient id="gl" cx=".35" cy=".3"><stop offset="0" stop-color="#EAF0E2"/><stop offset="1" stop-color="#A8D2C4"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#gl)"/><ellipse cx="80" cy="74" rx="26" ry="14" fill="#fff" opacity=".5" transform="rotate(-24 80 74)"/><circle cx="130" cy="120" r="8" fill="#fff" opacity=".45"/><circle cx="110" cy="140" r="4" fill="#fff" opacity=".45"/></svg><span class="tag">Gel · Clear Cleanse</span></div>
+    <div class="swatch s3"><svg viewBox="0 0 200 200"><defs><radialGradient id="oi" cx=".4" cy=".35"><stop offset="0" stop-color="#F2D79A"/><stop offset="1" stop-color="#C08A3E"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#oi)"/><ellipse cx="78" cy="72" rx="30" ry="12" fill="#fff" opacity=".45" transform="rotate(-30 78 72)"/><circle cx="132" cy="128" r="16" fill="#fff" opacity=".18"/></svg><span class="tag">Oil · Night Oil</span></div>
+  </div>
+</section>
+
+<section class="section alignwide has-global-padding" id="shop" style="padding-top:clamp(40px,6vw,80px)" aria-labelledby="sH">
+  <div class="section-head reveal"><div><p class="eyebrow">Shop by skin</p><h2 id="sH" class="wp-block-heading" style="margin-top:14px">Choose your skin.<br><em>We'll do the rest.</em></h2></div><p>Every product is tagged with the skin types it was tested on. Pick yours and the shelf rearranges itself.</p></div>
+  <div class="wc-block-product-filters reveal" role="group" aria-label="Filter by skin type">
+    <button class="filter-chip" aria-pressed="true" data-f="all">All skin</button><button class="filter-chip" aria-pressed="false" data-f="dry">Dry</button><button class="filter-chip" aria-pressed="false" data-f="oily">Oily</button><button class="filter-chip" aria-pressed="false" data-f="sensitive">Sensitive</button><button class="filter-chip" aria-pressed="false" data-f="combo">Combination</button>
+    <span class="filter-count" id="fc" aria-live="polite">Showing 6 of 6</span>
+  </div>
+  <ul class="wc-block-grid__products" id="grid"></ul>
+</section>
+
+<section class="section alignwide has-global-padding glossary" id="glossary" aria-labelledby="gH">
+  <div class="lead-col reveal"><p class="eyebrow">Ingredient glossary</p><h2 id="gH" class="wp-block-heading" style="margin-top:14px">Every word on<br>the label, <em>explained.</em></h2><p>No marketing names. Here's what each ingredient is, why it's there, and how much we use.</p></div>
+  <div>
+    <details class="wp-block-details reveal" open><summary><h3>Glycerin</h3><span class="role">Humectant</span><span class="pm" aria-hidden="true"></span></summary><div class="body"><p>A plant-derived sugar alcohol that pulls water into the top layer of skin. Unglamorous, cheap and one of the best-studied moisturisers there is.</p><small>In: Clear Cleanse 5%, Daily Moisture 7%</small></div></details>
+    <details class="wp-block-details reveal"><summary><h3>Panthenol</h3><span class="role">Soother</span><span class="pm" aria-hidden="true"></span></summary><div class="body"><p>Pro-vitamin B5. It calms irritation and helps skin repair after shaving, sun or over-exfoliating.</p><small>In: Barrier Mist 2%, Daily Moisture 1%</small></div></details>
+    <details class="wp-block-details reveal"><summary><h3>Azelaic acid</h3><span class="role">Clarifier</span><span class="pm" aria-hidden="true"></span></summary><div class="body"><p>Gently clears pores and fades marks left by breakouts. Kinder than most acids, so it suits sensitive skin.</p><small>In: Clarity Serum 10%</small></div></details>
+    <details class="wp-block-details reveal"><summary><h3>Ceramide NP</h3><span class="role">Barrier</span><span class="pm" aria-hidden="true"></span></summary><div class="body"><p>One of the lipids your skin's own barrier is made of. Topping it up keeps water in and irritants out.</p><small>In: Daily Moisture, Rich Balm</small></div></details>
+    <details class="wp-block-details reveal"><summary><h3>Squalane</h3><span class="role">Emollient</span><span class="pm" aria-hidden="true"></span></summary><div class="body"><p>A light, stable oil that mirrors the one your skin makes. Softens without clogging, even on oily skin.</p><small>In: Night Oil 100%</small></div></details>
+  </div>
+</section>
+
+<section class="alignwide has-global-padding" id="consult" aria-labelledby="cH">
+  <div class="consult reveal">
+    <svg class="bg" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="98" fill="none" stroke="#F4F0EA" stroke-width="1"/><circle cx="100" cy="100" r="70" fill="none" stroke="#F4F0EA" stroke-width="1"/><circle cx="100" cy="100" r="42" fill="none" stroke="#F4F0EA" stroke-width="1"/></svg>
+    <div><p class="eyebrow" style="color:#A8D2C4">Free skin consult</p><h2 id="cH" class="wp-block-heading" style="margin-top:14px">Not sure? Talk to <em>a real person.</em></h2></div>
+    <div><p>Fifteen minutes on video with one of our skin therapists. No selling, just a routine that suits you, sent to your inbox afterwards.</p><div class="wp-block-button"><a class="wp-block-button__link" href="#">Book a free consult</a></div></div>
+  </div>
+</section>
+</main>
+
+<footer class="wp-block-template-part site-footer"><div class="alignwide has-global-padding">
+  <div class="cols">
+    <div><span class="wp-block-site-title">Sable</span><p style="margin-top:10px;max-width:22rem">Six honest formulas, made in small batches in Lisbon.</p></div>
+    <div><h4>Shop</h4><ul><li><a href="#shop">All products</a></li><li><a href="#">Sets</a></li><li><a href="#">Refills</a></li></ul></div>
+    <div><h4>Learn</h4><ul><li><a href="#glossary">Ingredients</a></li><li><a href="#consult">Consults</a></li><li><a href="#">Journal</a></li></ul></div>
+    <div><h4>Help</h4><ul><li><a href="#">Delivery</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact</a></li></ul></div>
+  </div>
+  <p class="legal">© 2026 Sable Skin, Lda.</p>
+</div></footer>
+</div>
+<script>
+(() => {
+  const d = document; d.body.classList.remove('no-js');
+  const P = [
+    {t:'Clear Cleanse', desc:'Low-foam gel cleanser with glycerin.', price:'€22', skin:['oily','combo','sensitive'], tint:'#DDE3D2', pack:'tube', smear:'#C7D3B2'},
+    {t:'Barrier Mist', desc:'Panthenol toner you spray, not swipe.', price:'€24', skin:['dry','sensitive','combo'], tint:'#E2DDD4', pack:'mist', smear:'#EDE6DA'},
+    {t:'Clarity Serum', desc:'10% azelaic acid for pores and marks.', price:'€34', skin:['oily','combo'], tint:'#E6DCCF', pack:'dropper', smear:'#F2E9DA'},
+    {t:'Daily Moisture', desc:'Ceramide cream, light enough for mornings.', price:'€32', skin:['dry','sensitive','combo','oily'], tint:'#E9E1D3', pack:'jar', smear:'#FBF8F3'},
+    {t:'Rich Balm', desc:'Overnight balm for very dry, cracked skin.', price:'€36', skin:['dry'], tint:'#E3D7C6', pack:'jar', smear:'#F3E7D2'},
+    {t:'Night Oil', desc:'Pure olive squalane. Three drops, done.', price:'€28', skin:['dry','sensitive','oily','combo'], tint:'#E8D9BF', pack:'dropper', smear:'#E9C98B'}
+  ];
+  const label = {dry:'Dry',oily:'Oily',sensitive:'Sensitive',combo:'Combination'};
+  /* realistic 3D renders in products/ (swap for your photography) */
+  const IMG = {'Clear Cleanse':'cleanse','Barrier Mist':'mist','Clarity Serum':'serum','Daily Moisture':'moisture','Rich Balm':'balm','Night Oil':'oil'};
+  const pack = p => `<img src="products/${IMG[p.t]}.webp" alt="Sable ${p.t}" loading="lazy" decoding="async">`;
+  const smear = c => `<svg class="smear" viewBox="0 0 120 80" aria-hidden="true"><path d="M10 50 C30 18 70 10 104 30 C116 38 110 60 88 62 C64 64 40 58 54 46" fill="none" stroke="${c}" stroke-width="16" stroke-linecap="round"/></svg>`;
+  const grid = d.getElementById('grid');
+  grid.innerHTML = P.map(p => `<li class="wc-block-grid__product reveal" data-skin="${p.skin.join(' ')}"><div class="wc-block-grid__product-image" style="--tint:${p.tint}">${pack(p)}</div>
+    <div class="skin-tags">${p.skin.map(s => `<span>${label[s]}</span>`).join('')}</div><h3 class="wc-block-grid__product-title">${p.t}</h3><p class="wc-block-grid__product-desc">${p.desc}</p>
+    <div class="wc-block-grid__product-row"><span class="wc-block-grid__product-price">${p.price}</span><button class="add_to_cart_button">Add to bag</button></div></li>`).join('');
+  const items = [...grid.children];
+  d.querySelectorAll('.filter-chip').forEach(c => c.onclick = () => {
+    d.querySelectorAll('.filter-chip').forEach(x => x.setAttribute('aria-pressed', x === c));
+    let n = 0; items.forEach(it => { const show = c.dataset.f === 'all' || it.dataset.skin.split(' ').includes(c.dataset.f);
+      it.classList.toggle('is-hidden', !show); if (show) { n++; it.classList.remove('pop'); void it.offsetWidth; it.classList.add('pop'); } });
+    d.getElementById('fc').textContent = `Showing ${n} of ${items.length}`;
+  });
+  let count = 0;
+  grid.addEventListener('click', e => { const b = e.target.closest('.add_to_cart_button'); if (!b) return; d.getElementById('cc').textContent = ++count; b.classList.add('added'); b.textContent = 'Added ✓'; setTimeout(() => { b.classList.remove('added'); b.textContent = 'Add to bag'; }, 1400); });
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { const sib = [...e.target.parentElement.children]; e.target.style.transitionDelay = Math.min(sib.indexOf(e.target),5)*.08 + 's'; e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.1});
+  d.querySelectorAll('.reveal').forEach(n => io.observe(n));
+})();
+</script>
+</body>
+</html>

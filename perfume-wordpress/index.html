@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Petal &amp; Pyre · Garden Perfumes</title>
+<meta name="description" content="Botanical perfumes distilled from a walled garden. Find your scent in three questions.">
+<meta name="theme-color" content="#F7EDEE">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%239E4A6E'/%3E%3Cpath d='M16 7c4 4 4 9 0 13-4-4-4-9 0-13z' fill='%23F7EDEE'/%3E%3Cpath d='M16 20v6' stroke='%23F7EDEE' stroke-width='1.6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  WORDPRESS NOTES (block theme + WooCommerce)
+  Colours/fonts map to theme.json presets: --wp--preset--color--{base,contrast,accent,surface}, --wp--preset--font-family--{heading,body}.
+  .wp-block-cover / -columns / -group / -buttons / -post-template are core blocks; paste each <section> as a block pattern (patterns/*.php).
+  Product grid = WooCommerce "Product Collection" block (.wc-block-grid__products). Add-to-cart buttons use .add_to_cart_button.
+  The scent finder is a small Custom HTML block + the script at the bottom (enqueue it in functions.php).
+-->
+<style>
+html,body{background:#F7EDEE;color:#33202B}
+:root{
+  --wp--preset--color--base:#F7EDEE; --wp--preset--color--surface:#F0E1E4; --wp--preset--color--contrast:#33202B; --wp--preset--color--accent:#9E4A6E;
+  --muted:rgba(51,32,43,.66); --faint:rgba(51,32,43,.45); --line:rgba(51,32,43,.14);
+  --wp--preset--font-family--heading:'Fraunces',Georgia,serif; --wp--preset--font-family--body:'Manrope',system-ui,sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1); --gut:clamp(20px,4vw,56px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--wp--preset--font-family--body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:clip}
+::selection{background:rgba(158,74,110,.25)}
+a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--wp--preset--color--accent);outline-offset:3px}
+img{display:block;max-width:100%}
+.alignwide{max-width:1320px;margin-left:auto;margin-right:auto}
+.has-global-padding{padding-left:var(--gut);padding-right:var(--gut)}
+.kicker{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--wp--preset--color--accent)}
+.wp-block-heading{font-family:var(--wp--preset--font-family--heading);font-weight:300;letter-spacing:-.02em;line-height:1.02}
+.wp-block-heading em{font-style:italic;color:var(--wp--preset--color--accent)}
+h2.wp-block-heading{font-size:clamp(38px,4.8vw,68px)}
+.wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:52px;padding:0 28px;border-radius:999px;font-size:14px;font-weight:600;transition:background .3s,color .3s,transform .15s,border-color .3s}
+.wp-block-button__link:active{transform:scale(.97)}
+.is-style-fill .wp-block-button__link{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base)}
+.is-style-fill .wp-block-button__link:hover{background:var(--wp--preset--color--accent)}
+.is-style-outline .wp-block-button__link{border:1.5px solid var(--wp--preset--color--contrast)}
+.is-style-outline .wp-block-button__link:hover{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base)}
+.wp-block-buttons{display:flex;gap:12px;flex-wrap:wrap}
+
+/* header */
+.wp-block-template-part.site-header{position:sticky;top:0;z-index:20;background:rgba(247,237,238,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s}
+.site-header.scrolled{border-color:var(--line)}
+.site-header .inner{display:flex;justify-content:space-between;align-items:center;height:76px}
+.wp-block-site-title{font-family:var(--wp--preset--font-family--heading);font-size:26px;font-weight:400;letter-spacing:-.01em}
+.wp-block-site-title i{color:var(--wp--preset--color--accent)}
+.wp-block-navigation{display:flex;gap:30px;font-size:14px;font-weight:500}
+.wp-block-navigation a{position:relative} .wp-block-navigation a::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1.5px;background:var(--wp--preset--color--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.wp-block-navigation a:hover::after{transform:scaleX(1)}
+.wc-block-mini-cart{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:1.5px solid var(--line);font-size:14px;font-weight:600;transition:border-color .3s}
+.wc-block-mini-cart:hover{border-color:var(--wp--preset--color--contrast)}
+.wc-block-mini-cart .count{min-width:20px;height:20px;border-radius:10px;background:var(--wp--preset--color--accent);color:#fff;font-size:11px;display:grid;place-items:center}
+
+/* hero */
+.hero.wp-block-columns{display:grid;grid-template-columns:1.05fr 1fr;gap:clamp(30px,5vw,80px);align-items:center;padding-top:clamp(40px,6vw,80px);padding-bottom:clamp(70px,8vw,120px)}
+.hero h1{font-size:clamp(56px,7.4vw,118px);line-height:.94;margin:18px 0 26px}
+.hero p.lead{color:var(--muted);font-size:18px;max-width:31rem;margin-bottom:34px}
+.hero-meta{display:flex;gap:28px;margin-top:44px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.hero-meta b{display:block;font-family:var(--wp--preset--font-family--heading);font-weight:400;font-size:28px;color:var(--wp--preset--color--contrast);line-height:1.1}
+.hero-art{position:relative;height:min(78vh,700px)}
+.hero-art .arch{position:absolute;right:0;top:0;width:78%;height:100%;border-radius:999px 999px 28px 28px;overflow:hidden;background:var(--wp--preset--color--surface)}
+.hero-art .arch img{width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform 2s var(--ease)}
+.is-loaded .hero-art .arch img{transform:scale(1)}
+.hero-art .disc{position:absolute;left:0;bottom:8%;width:38%;aspect-ratio:1;border-radius:50%;overflow:hidden;border:10px solid var(--wp--preset--color--base)}
+.hero-art .disc img{width:100%;height:100%;object-fit:cover}
+.hero-art .stamp{position:absolute;left:12%;top:10%;width:120px;height:120px;animation:spin 30s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* products */
+.section{padding-top:clamp(90px,11vw,150px);padding-bottom:clamp(90px,11vw,150px)}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:50px}
+.section-head p{max-width:26rem;color:var(--muted)}
+.wc-block-grid__products{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;list-style:none}
+.wc-block-grid__product{display:flex;flex-direction:column}
+.wc-block-grid__product-image{position:relative;aspect-ratio:4/5;border-radius:999px 999px 24px 24px;background:var(--tint);display:grid;place-items:center;overflow:hidden}
+.wc-block-grid__product-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
+.wc-block-grid__product:hover .wc-block-grid__product-image img{transform:scale(1.05)}
+.wc-block-grid__product-image .sprig{position:absolute;bottom:-6%;right:-6%;width:46%;opacity:.5;transition:transform .9s var(--ease)}
+.wc-block-grid__product:hover .sprig{transform:rotate(-10deg) translateY(-6px)}
+.wc-block-grid__product-title{font-family:var(--wp--preset--font-family--heading);font-weight:400;font-size:28px;margin-top:20px;line-height:1.1}
+.wc-block-grid__product-notes{color:var(--muted);font-size:14px;margin:4px 0 14px}
+.wc-block-grid__product-row{display:flex;justify-content:space-between;align-items:center}
+.wc-block-grid__product-price{font-weight:600}
+.add_to_cart_button{height:42px;padding:0 20px;border-radius:999px;border:1.5px solid var(--wp--preset--color--contrast);font-size:13px;font-weight:600;transition:background .3s,color .3s}
+.add_to_cart_button:hover,.add_to_cart_button.added{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base)}
+
+/* scent finder */
+.finder{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base);border-radius:40px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+.finder-media{position:relative;min-height:560px}
+.finder-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.finder-media::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 60%,rgba(51,32,43,.6))}
+.finder-body{padding:clamp(36px,5vw,72px);display:flex;flex-direction:column}
+.finder-body .kicker{color:#E9A8C2}
+.finder-body h2{color:var(--wp--preset--color--base);margin:14px 0 10px}
+.finder-body h2 em{color:#E9A8C2}
+.steps{display:flex;gap:6px;margin:26px 0 30px}
+.steps i{height:3px;flex:1;background:rgba(247,237,238,.18);border-radius:2px;transition:background .4s}
+.steps i.on{background:#E9A8C2}
+.q{display:none} .q.active{display:block;animation:qin .5s var(--ease)}
+@keyframes qin{from{opacity:0;transform:translateY(10px)}}
+.q h3{font-family:var(--wp--preset--font-family--heading);font-weight:300;font-size:30px;margin-bottom:20px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{min-height:48px;padding:0 20px;border-radius:999px;border:1.5px solid rgba(247,237,238,.28);font-size:15px;font-weight:500;transition:all .25s}
+.chip:hover{border-color:var(--wp--preset--color--base)}
+.chip[aria-pressed="true"]{background:var(--wp--preset--color--base);color:var(--wp--preset--color--contrast);border-color:var(--wp--preset--color--base)}
+.result{display:none;grid-template-columns:110px 1fr;gap:24px;align-items:center;animation:qin .6s var(--ease)}
+.result.active{display:grid}
+.result .bottle{height:170px;border-radius:999px 999px 18px 18px;background:var(--tint);display:grid;place-items:center}
+.result .bottle{overflow:hidden;position:relative} .result .bottle img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.result h3{font-family:var(--wp--preset--font-family--heading);font-weight:400;font-size:40px;line-height:1}
+.result p{color:rgba(247,237,238,.72);margin:10px 0 18px;font-size:15px}
+.result .wp-block-buttons .wp-block-button__link{height:46px;padding:0 22px}
+.result .light .wp-block-button__link{background:var(--wp--preset--color--base);color:var(--wp--preset--color--contrast)}
+.result .ghost .wp-block-button__link{border:1.5px solid rgba(247,237,238,.3)}
+.finder-foot{margin-top:auto;padding-top:30px;font-size:13px;color:rgba(247,237,238,.5)}
+
+/* journal */
+.wp-block-post-template{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;list-style:none}
+.wp-block-post{display:flex;flex-direction:column}
+.wp-block-post-featured-image{aspect-ratio:4/3;border-radius:24px;overflow:hidden}
+.wp-block-post-featured-image img{width:100%;height:100%;object-fit:cover;transition:transform .9s var(--ease)}
+.wp-block-post:hover .wp-block-post-featured-image img{transform:scale(1.05)}
+.wp-block-post-date{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-top:18px}
+.wp-block-post-title{font-family:var(--wp--preset--font-family--heading);font-weight:400;font-size:26px;line-height:1.15;margin:6px 0 8px}
+.wp-block-post-excerpt{color:var(--muted);font-size:15px}
+
+/* cta + footer */
+.cta{text-align:center;padding-bottom:clamp(80px,10vw,130px)}
+.cta h2{font-size:clamp(48px,7vw,104px);max-width:14ch;margin:16px auto 20px}
+.cta p{color:var(--muted);max-width:30rem;margin:0 auto 30px}
+.newsletter-form{display:flex;max-width:460px;margin:0 auto;border:1.5px solid var(--wp--preset--color--contrast);border-radius:999px;padding:5px}
+.newsletter-form input{flex:1;min-width:0;width:0;border:0;outline:0;background:none;font:inherit;padding:0 18px}
+.newsletter-form button{height:44px;padding:0 22px;border-radius:999px;background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base);font-weight:600;font-size:14px;white-space:nowrap}
+.note{font-size:13px;color:var(--faint);margin-top:12px;min-height:20px}
+.site-footer{border-top:1px solid var(--line);padding-top:48px;padding-bottom:max(36px,env(safe-area-inset-bottom))}
+.site-footer .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:30px;font-size:14px;color:var(--muted)}
+.site-footer h4{color:var(--wp--preset--color--contrast);font-size:14px;margin-bottom:10px}
+.site-footer li{list-style:none;margin-bottom:6px} .site-footer a:hover{color:var(--wp--preset--color--contrast)}
+.site-footer .legal{margin-top:40px;font-size:12px;color:var(--faint)}
+
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease),transform .9s var(--ease)} .reveal.in{opacity:1;transform:none}
+.no-js .reveal{opacity:1;transform:none}
+
+@media (max-width:960px){
+  .wp-block-navigation{display:none}
+  .hero.wp-block-columns,.finder{grid-template-columns:1fr}
+  .hero-art{height:520px} .finder-media{min-height:280px}
+  .wc-block-grid__products,.wp-block-post-template{grid-template-columns:repeat(3,78%);overflow-x:auto;scroll-snap-type:x mandatory;margin:0 calc(var(--gut)*-1);padding:0 var(--gut) 6px;scrollbar-width:none}
+  .wc-block-grid__product,.wp-block-post{scroll-snap-align:start}
+  .section-head{flex-direction:column;align-items:start}
+  .site-footer .cols{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){ .hero-art{height:430px} .hero-art .stamp{width:90px;height:90px} .hero-meta{gap:18px} .result{grid-template-columns:80px 1fr} .result .bottle{height:130px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important} .reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body class="no-js">
+<div class="wp-site-blocks">
+<header class="wp-block-template-part site-header" id="siteHeader">
+  <div class="inner alignwide has-global-padding">
+    <a href="#" class="wp-block-site-title" aria-label="Petal and Pyre home">Petal <i>&amp;</i> Pyre</a>
+    <nav class="wp-block-navigation" aria-label="Primary"><a href="#shop">Shop</a><a href="#finder">Scent finder</a><a href="#journal">Journal</a><a href="#visit">Visit the garden</a></nav>
+    <a href="#shop" class="wc-block-mini-cart" id="miniCart">Cart <span class="count" id="cartCount">0</span></a>
+  </div>
+</header>
+
+<main>
+<section class="hero wp-block-columns alignwide has-global-padding" aria-labelledby="heroH">
+  <div class="wp-block-column">
+    <p class="kicker reveal">Garden perfumes · Distilled in Kent</p>
+    <h1 id="heroH" class="wp-block-heading reveal">A garden,<br><em>after rain.</em></h1>
+    <p class="lead reveal">Every Petal &amp; Pyre perfume starts in our walled garden and ends in a small copper still. Botanical, a little smoky, and made in batches you can count.</p>
+    <div class="wp-block-buttons reveal">
+      <div class="wp-block-button is-style-fill"><a class="wp-block-button__link" href="#finder">Find your scent</a></div>
+      <div class="wp-block-button is-style-outline"><a class="wp-block-button__link" href="#shop">Shop all perfumes</a></div>
+    </div>
+    <div class="hero-meta reveal"><div><b>3</b>acres of garden</div><div><b>40</b>plants we distil</div><div><b>Small</b>batches, numbered</div></div>
+  </div>
+  <div class="wp-block-column hero-art reveal" aria-hidden="true">
+    <figure class="arch wp-block-image"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260412_055431_11d841fd-8b41-46a5-82e4-b04f2407a7d8.png" alt="Lavender, foxglove and red blooms in the walled garden" fetchpriority="high"></figure>
+    <figure class="disc wp-block-image"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260412_055344_5eff02e0-87a5-41ce-b64f-eb08da8f33db.png" alt="" loading="lazy"></figure>
+    <svg class="stamp" viewBox="0 0 120 120"><defs><path id="c" d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"/></defs><circle cx="60" cy="60" r="58" fill="#9E4A6E"/><text font-family="Manrope" font-size="9.6" font-weight="600" letter-spacing="1.6" fill="#F7EDEE"><textPath href="#c">GROWN · DISTILLED · BOTTLED BY HAND ·</textPath></text><path d="M60 42c8 8 8 18 0 26-8-8-8-18 0-26z" fill="#F7EDEE"/><path d="M60 68v12" stroke="#F7EDEE" stroke-width="2"/></svg>
+  </div>
+</section>
+
+<section class="section alignwide has-global-padding" id="shop" aria-labelledby="shopH">
+  <div class="section-head reveal">
+    <div><p class="kicker">The perfumes</p><h2 id="shopH" class="wp-block-heading" style="margin-top:14px">Three beds, <em>three bottles.</em></h2></div>
+    <p>Each perfume is named after the part of the garden it comes from. 50 ml eau de parfum, refillable glass.</p>
+  </div>
+  <ul class="wc-block-grid__products" id="products"></ul>
+</section>
+
+<section class="section alignwide has-global-padding" id="finder" style="padding-top:0" aria-labelledby="findH">
+  <div class="finder reveal">
+    <div class="finder-media"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png" alt="Wildflowers glowing in late evening light" loading="lazy"></div>
+    <div class="finder-body">
+      <p class="kicker">Scent finder</p>
+      <h2 id="findH" class="wp-block-heading">Three questions, <em>one bottle.</em></h2>
+      <div class="steps" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+      <div id="quiz" aria-live="polite">
+        <div class="q active" data-q="0"><h3>When will you wear it most?</h3><div class="chips"><button class="chip" data-v="day">Daytime</button><button class="chip" data-v="night">Evenings</button><button class="chip" data-v="any">Every day</button></div></div>
+        <div class="q" data-q="1"><h3>Which part of the garden?</h3><div class="chips"><button class="chip" data-v="herb">The herb path</button><button class="chip" data-v="rose">The rose bed</button><button class="chip" data-v="fire">The bonfire</button></div></div>
+        <div class="q" data-q="2"><h3>How close should it sit?</h3><div class="chips"><button class="chip" data-v="close">Close to my skin</button><button class="chip" data-v="room">Fill the room</button></div></div>
+        <div class="result" id="result"></div>
+      </div>
+      <p class="finder-foot">Not sure after all? Every order includes three samples, free.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section alignwide has-global-padding" id="journal" style="padding-top:0" aria-labelledby="jH">
+  <div class="section-head reveal">
+    <div><p class="kicker">From the journal</p><h2 id="jH" class="wp-block-heading" style="margin-top:14px">Notes from <em>the garden.</em></h2></div>
+    <a class="wp-block-button__link" href="#" style="height:auto;padding:0;border-radius:0;border-bottom:1.5px solid">Read the journal</a>
+  </div>
+  <ul class="wp-block-post-template">
+    <li class="wp-block-post reveal"><figure class="wp-block-post-featured-image"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260412_055344_5eff02e0-87a5-41ce-b64f-eb08da8f33db.png" alt="Marigolds and lavender in the herb path" loading="lazy"></figure><time class="wp-block-post-date">October 2026</time><h3 class="wp-block-post-title">Why we distil marigolds in the rain</h3><p class="wp-block-post-excerpt">Wet petals give a greener, sharper oil. Here's how the October harvest went.</p></li>
+    <li class="wp-block-post reveal"><figure class="wp-block-post-featured-image"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png" alt="Evening light over the wildflower bed" loading="lazy"></figure><time class="wp-block-post-date">September 2026</time><h3 class="wp-block-post-title">The bonfire accord, explained</h3><p class="wp-block-post-excerpt">Birch tar, cade and a little apple wood. The smoke in Pyre, and how to wear it.</p></li>
+    <li class="wp-block-post reveal"><figure class="wp-block-post-featured-image"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260412_055431_11d841fd-8b41-46a5-82e4-b04f2407a7d8.png" alt="Foxgloves in the rose bed" loading="lazy"></figure><time class="wp-block-post-date">August 2026</time><h3 class="wp-block-post-title">Planting for a perfume, not a vase</h3><p class="wp-block-post-excerpt">We grow for scent first. That changes which roses we choose and when we cut them.</p></li>
+  </ul>
+</section>
+
+<section class="cta has-global-padding" id="visit" aria-labelledby="ctaH">
+  <p class="kicker reveal">Open days · May to September</p>
+  <h2 id="ctaH" class="wp-block-heading reveal">Walk the garden <em>you'll wear.</em></h2>
+  <p class="reveal">Join our letter for open-day dates, new batches and the occasional recipe from the still room.</p>
+  <form class="newsletter-form reveal" id="nl"><label for="nlE" style="position:absolute;left:-9999px">Email</label><input id="nlE" type="email" placeholder="Your email" required><button>Subscribe</button></form>
+  <p class="note" id="nlNote" aria-live="polite"></p>
+</section>
+</main>
+
+<footer class="wp-block-template-part site-footer">
+  <div class="alignwide has-global-padding">
+    <div class="cols">
+      <div><span class="wp-block-site-title">Petal <i>&amp;</i> Pyre</span><p style="margin-top:12px;max-width:22rem">Garden perfumes, grown and distilled on three acres in Kent.</p></div>
+      <div><h4>Shop</h4><ul><li><a href="#shop">Perfumes</a></li><li><a href="#">Sample set</a></li><li><a href="#">Refills</a></li></ul></div>
+      <div><h4>Garden</h4><ul><li><a href="#journal">Journal</a></li><li><a href="#visit">Open days</a></li><li><a href="#">Workshops</a></li></ul></div>
+      <div><h4>Help</h4><ul><li><a href="#">Delivery</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact</a></li></ul></div>
+    </div>
+    <p class="legal">© 2026 Petal &amp; Pyre</p>
+  </div>
+</footer>
+</div>
+<script>
+(() => {
+  const d = document; d.body.classList.remove('no-js');
+  const P = {
+    herb:{img:'herb', name:'Herb Path', notes:'Marigold, rosemary, wet stone', price:'£92', tint:'#DCE0C5', liquid:'#A9B36B', why:'Green and bright, like brushing past rosemary on a damp morning.'},
+    rose:{img:'rose', name:'Rose Bed', notes:'Damask rose, blackcurrant leaf, honey', price:'£98', tint:'#EED3C8', liquid:'#D08A86', why:'Soft and full, with a green edge so it never turns powdery.'},
+    fire:{img:'pyre', name:'Pyre', notes:'Birch smoke, apple wood, lavender', price:'£98', tint:'#E2CDB6', liquid:'#B07440', why:'Warm smoke with lavender on top. The garden in October, after the bonfire.'}
+  };
+  /* realistic 3D renders in products/ (swap for your photography) */
+  const bottle = p => `<img src="products/${p.img}.webp" alt="${p.name} eau de parfum" loading="lazy" decoding="async">`;
+  const sprig = `<svg class="sprig" viewBox="0 0 100 100" aria-hidden="true"><path d="M10 95 C40 60 60 40 92 8" stroke="#33202B" stroke-opacity=".5" fill="none" stroke-width="1.5"/>${[20,34,48,62,76].map((t,i)=>`<ellipse cx="${10+t*.9}" cy="${92-t*.95}" rx="9" ry="3.5" fill="#33202B" fill-opacity=".35" transform="rotate(${i%2?-40:50} ${10+t*.9} ${92-t*.95})"/>`).join('')}</svg>`;
+  d.getElementById('products').innerHTML = Object.entries(P).map(([k,p]) => `
+    <li class="wc-block-grid__product reveal"><div class="wc-block-grid__product-image" style="--tint:${p.tint}">${bottle(p)}</div>
+      <h3 class="wc-block-grid__product-title">${p.name}</h3><p class="wc-block-grid__product-notes">${p.notes}</p>
+      <div class="wc-block-grid__product-row"><span class="wc-block-grid__product-price">${p.price} · 50 ml</span><button class="add_to_cart_button" data-product="${k}">Add to cart</button></div></li>`).join('');
+
+  let count = 0; const cc = d.getElementById('cartCount');
+  d.addEventListener('click', e => { const b = e.target.closest('[data-product]'); if (!b) return; count++; cc.textContent = count;
+    if (b.classList.contains('add_to_cart_button')) { b.classList.add('added'); b.textContent = 'Added ✓'; setTimeout(() => { b.classList.remove('added'); b.textContent = 'Add to cart'; }, 1500); } else b.textContent = 'Added to cart'; });
+
+  /* scent finder */
+  const qs = [...d.querySelectorAll('.q')], steps = [...d.querySelectorAll('.steps i')], ans = [];
+  const show = i => { qs.forEach((q,j) => q.classList.toggle('active', j === i)); steps.forEach((s,j) => s.classList.toggle('on', j <= i)); };
+  qs.forEach((q,i) => q.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    q.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === c)); ans[i] = c.dataset.v;
+    setTimeout(() => i < 2 ? show(i + 1) : finish(), 280);
+  })));
+  function finish(){
+    let k = ans[1]; if (ans[0] === 'night' && ans[2] === 'room') k = 'fire'; if (ans[0] === 'day' && k === 'fire' && ans[2] === 'close') k = 'herb';
+    const p = P[k]; qs.forEach(q => q.classList.remove('active'));
+    const r = d.getElementById('result');
+    r.innerHTML = `<div class="bottle" style="--tint:${p.tint}">${bottle(p)}</div><div><p class="kicker" style="color:#E9A8C2">Your scent</p><h3>${p.name}</h3><p>${p.why}</p>
+      <div class="wp-block-buttons"><div class="wp-block-button light"><button class="wp-block-button__link" data-product="${k}">Add to cart · ${p.price}</button></div><div class="wp-block-button ghost"><button class="wp-block-button__link" id="again">Start again</button></div></div></div>`;
+    r.classList.add('active');
+    d.getElementById('again').onclick = () => { r.classList.remove('active'); ans.length = 0; d.querySelectorAll('.chip').forEach(c => c.removeAttribute('aria-pressed')); show(0); };
+  }
+
+  addEventListener('scroll', () => d.getElementById('siteHeader').classList.toggle('scrolled', scrollY > 10), {passive:true});
+  requestAnimationFrame(() => requestAnimationFrame(() => d.body.classList.add('is-loaded')));
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { const sib = [...e.target.parentElement.children]; e.target.style.transitionDelay = Math.min(sib.indexOf(e.target),5)*.08 + 's'; e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.1});
+  d.querySelectorAll('.reveal').forEach(n => io.observe(n));
+  d.getElementById('nl').onsubmit = e => { e.preventDefault(); d.getElementById('nlNote').textContent = 'Thank you. Open-day dates will reach you first.'; };
+})();
+</script>
+</body>
+</html>

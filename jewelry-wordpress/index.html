@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Celeste · Silver &amp; Sapphire</title>
+<meta name="description" content="Recycled silver and lab-grown sapphire jewelry, engraved in our London workshop. Preview your engraving live.">
+<meta name="theme-color" content="#050A1F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23050A1F'/%3E%3Cpath d='M16 6l3 7 7 3-7 3-3 7-3-7-7-3 7-3z' fill='%236E95FF'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<!--
+  WORDPRESS NOTES (block theme + WooCommerce)
+  theme.json presets: --wp--preset--color--{base,contrast,accent,surface}. Hero = core Cover block with a background video (wp-block-cover__video-background).
+  Product grid = WooCommerce Product Collection. Engraving studio = WooCommerce product add-on field ("engraving_text", "engraving_style") rendered via a Custom HTML block; the preview script is enqueued separately.
+-->
+<style>
+html,body{background:#050A1F;color:#EAF0FF}
+:root{--wp--preset--color--base:#050A1F;--wp--preset--color--surface:#0B1433;--wp--preset--color--contrast:#EAF0FF;--wp--preset--color--accent:#6E95FF;
+  --muted:rgba(234,240,255,.62);--faint:rgba(234,240,255,.4);--line:rgba(234,240,255,.12);
+  --serif:'EB Garamond',Garamond,Georgia,serif;--sans:'Jost',system-ui,sans-serif;--ease:cubic-bezier(.16,1,.3,1);--gut:clamp(20px,4vw,56px)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip}
+::selection{background:rgba(110,149,255,.3)}
+a{color:inherit;text-decoration:none} button,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+:focus-visible{outline:1.5px solid var(--wp--preset--color--accent);outline-offset:3px}
+.alignwide{max-width:1340px;margin:0 auto} .has-global-padding{padding-left:var(--gut);padding-right:var(--gut)}
+.kicker{font-size:12px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--wp--preset--color--accent)}
+.wp-block-heading{font-family:var(--serif);font-weight:400;letter-spacing:-.015em;line-height:1}
+.wp-block-heading em{color:var(--wp--preset--color--accent)}
+h2.wp-block-heading{font-size:clamp(42px,5.4vw,82px)}
+.wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:52px;padding:0 28px;border-radius:999px;font-size:14px;font-weight:500;letter-spacing:.04em;transition:background .3s,color .3s,border-color .3s,transform .15s}
+.wp-block-button__link:active{transform:scale(.97)}
+.is-style-fill .wp-block-button__link{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base)} .is-style-fill .wp-block-button__link:hover{background:var(--wp--preset--color--accent)}
+.is-style-outline .wp-block-button__link{border:1px solid rgba(234,240,255,.3)} .is-style-outline .wp-block-button__link:hover{border-color:var(--wp--preset--color--contrast)}
+.wp-block-buttons{display:flex;gap:12px;flex-wrap:wrap}
+
+.site-header{position:fixed;top:0;left:0;right:0;z-index:20;transition:background .35s}
+.site-header.scrolled{background:rgba(5,10,31,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.site-header .inner{display:flex;align-items:center;justify-content:space-between;height:78px}
+.wp-block-site-title{font-family:var(--serif);font-size:30px;letter-spacing:.2em;font-weight:400}
+.wp-block-navigation{display:flex;gap:32px;font-size:14px;color:var(--muted)} .wp-block-navigation a:hover{color:var(--wp--preset--color--contrast)}
+.wc-block-mini-cart{font-size:14px;display:flex;gap:8px;align-items:center}
+.wc-block-mini-cart b{min-width:22px;height:22px;border-radius:11px;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:500}
+
+/* hero cover */
+.wp-block-cover{position:relative;height:100vh;height:100dvh;min-height:640px;overflow:hidden;display:flex;align-items:center}
+.wp-block-cover__video-background{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% 50%;opacity:0;transition:opacity 1.4s}
+.wp-block-cover__video-background.ready{opacity:1}
+.wp-block-cover__background{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,10,31,.92) 0%,rgba(5,10,31,.5) 45%,rgba(5,10,31,0) 70%),linear-gradient(0deg,#050A1F 0%,rgba(5,10,31,0) 30%)}
+.wp-block-cover__inner-container{position:relative;z-index:2;width:100%}
+.hero h1{font-size:clamp(60px,8vw,132px);line-height:.92;margin:20px 0 26px;max-width:9ch}
+.hero h1 em{font-style:italic}
+.hero p.lead{color:var(--muted);font-size:18px;max-width:30rem;margin-bottom:34px}
+.hero-foot{position:absolute;left:0;right:0;bottom:clamp(24px,5vh,44px);z-index:2;display:flex;justify-content:space-between;font-size:12px;color:var(--faint);letter-spacing:.08em}
+
+/* products */
+.section{padding-top:clamp(90px,11vw,150px);padding-bottom:clamp(90px,11vw,150px)}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:50px}
+.section-head p{max-width:25rem;color:var(--muted)}
+.wc-block-grid__products{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;list-style:none}
+.wc-block-grid__product{display:flex;flex-direction:column}
+.wc-block-grid__product-image{position:relative;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 40%,#122458,#081230 70%);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;transition:border-color .5s}
+.wc-block-grid__product:hover .wc-block-grid__product-image{border-color:rgba(110,149,255,.4)}
+.wc-block-grid__product-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+.wc-block-grid__product:hover .wc-block-grid__product-image img{transform:scale(1.08)}
+.wc-block-grid__product-image .glint{z-index:1;mix-blend-mode:screen}
+.wc-block-grid__product-image .glint{position:absolute;width:40%;height:40%;border-radius:50%;background:radial-gradient(circle,rgba(110,149,255,.35),transparent 70%);top:20%;left:20%;opacity:0;transition:opacity .6s}
+.wc-block-grid__product:hover .glint{opacity:1}
+.wc-block-grid__product-title{font-family:var(--serif);font-weight:400;font-size:30px;text-align:center;margin-top:24px}
+.wc-block-grid__product-meta{text-align:center;color:var(--faint);font-size:14px}
+.wc-block-grid__product-price{text-align:center;margin-top:6px}
+.wc-block-grid__product .add_to_cart_button{margin:16px auto 0;height:42px;padding:0 22px;border-radius:999px;border:1px solid rgba(234,240,255,.25);font-size:13px;transition:background .3s,color .3s}
+.wc-block-grid__product .add_to_cart_button:hover,.add_to_cart_button.added{background:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base)}
+
+/* engraving studio */
+.studio{background:var(--wp--preset--color--surface);border:1px solid var(--line);border-radius:36px;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
+.studio-preview{position:relative;display:grid;place-items:center;min-height:580px;background:radial-gradient(circle at 50% 45%,#18306A,#050B22 72%)}
+.eng-stage{position:relative;width:min(84%,460px);aspect-ratio:4/5;border-radius:24px;overflow:hidden;box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+.eng-stage img,.eng-stage svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.studio-preview .caption{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-size:12px;color:var(--faint);letter-spacing:.12em}
+#engraving{transition:opacity .2s}
+.studio-form{padding:clamp(36px,5vw,72px);display:flex;flex-direction:column}
+.studio-form p.intro{color:var(--muted);margin:18px 0 30px;max-width:28rem}
+.field{margin-bottom:24px}
+.field label,.field .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:10px}
+.field input[type=text]{width:100%;height:58px;border-radius:16px;border:1px solid rgba(234,240,255,.2);background:rgba(234,240,255,.04);padding:0 20px;font-family:var(--serif);font-size:24px;outline:0;transition:border-color .3s}
+.field input[type=text]:focus{border-color:var(--wp--preset--color--accent)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button{height:58px;border-radius:16px;border:1px solid rgba(234,240,255,.16);transition:all .25s;font-size:20px}
+.seg button[aria-pressed="true"]{border-color:var(--wp--preset--color--accent);background:rgba(110,149,255,.1)}
+.seg button[data-style="serif"]{font-family:var(--serif)} .seg button[data-style="script"]{font-family:'Pinyon Script',cursive;font-size:24px} .seg button[data-style="block"]{font-family:var(--sans);letter-spacing:.16em;font-size:15px}
+.metal-row{display:flex;gap:10px}
+.metal-row button{width:44px;height:44px;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 -3px 6px rgba(0,0,0,.35),inset 0 3px 6px rgba(255,255,255,.4);transition:border-color .25s,transform .25s}
+.metal-row button[aria-pressed="true"]{border-color:var(--wp--preset--color--accent);transform:scale(1.08)}
+.studio-total{margin-top:auto;padding-top:26px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.studio-total .price{font-family:var(--serif);font-size:34px}
+.studio-total small{display:block;font-family:var(--sans);font-size:12px;color:var(--faint)}
+
+/* story + cta */
+.story{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin-top:60px}
+.story > div{padding:34px 30px 0 0} .story > div + div{padding-left:30px;border-left:1px solid var(--line)}
+.story b{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(48px,5vw,76px);line-height:1;color:var(--wp--preset--color--accent)}
+.story h3{font-family:var(--serif);font-weight:400;font-size:26px;margin:12px 0 6px}
+.story p{color:var(--muted);font-size:15px;max-width:32ch}
+.cta{text-align:center;padding-bottom:clamp(80px,10vw,130px)}
+.cta h2{font-size:clamp(50px,7.4vw,112px);margin:16px auto 22px;max-width:12ch}
+.cta p{color:var(--muted);max-width:30rem;margin:0 auto 30px}
+.cta .wp-block-buttons{justify-content:center}
+.site-footer{border-top:1px solid var(--line);padding-top:44px;padding-bottom:max(30px,env(safe-area-inset-bottom))}
+.site-footer .cols{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:30px;font-size:14px;color:var(--muted)}
+.site-footer h4{color:var(--wp--preset--color--contrast);font-weight:500;font-size:14px;margin-bottom:10px}
+.site-footer li{list-style:none;margin-bottom:6px} .site-footer a:hover{color:var(--wp--preset--color--contrast)}
+.site-footer .legal{margin-top:36px;font-size:12px;color:var(--faint)}
+
+.reveal{opacity:0;transform:translateY(26px);transition:opacity 1s var(--ease),transform 1s var(--ease)} .reveal.in{opacity:1;transform:none}
+.no-js .reveal{opacity:1;transform:none}
+
+@media (max-width:960px){
+  .wp-block-navigation{display:none}
+  .wp-block-cover{align-items:flex-end;padding-bottom:90px}
+  .wp-block-cover__video-background{object-position:62% 50%}
+  .wp-block-cover__background{background:linear-gradient(0deg,#050A1F 0%,rgba(5,10,31,.85) 45%,rgba(5,10,31,.2) 80%)}
+  .wc-block-grid__products{grid-template-columns:repeat(3,76%);overflow-x:auto;scroll-snap-type:x mandatory;margin:0 calc(var(--gut)*-1);padding:0 var(--gut) 6px;scrollbar-width:none}
+  .wc-block-grid__product{scroll-snap-align:start}
+  .studio{grid-template-columns:1fr} .studio-preview{min-height:420px}
+  .story{grid-template-columns:1fr} .story > div + div{padding-left:0;border-left:0;border-top:1px solid var(--line);margin-top:28px}
+  .section-head{flex-direction:column;align-items:start} .site-footer .cols{grid-template-columns:1fr 1fr}
+  .hero-foot{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important} .reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body class="no-js">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="ag" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6f7684"/><stop offset=".3" stop-color="#f3f5f9"/><stop offset=".55" stop-color="#9aa1ae"/><stop offset=".8" stop-color="#ffffff"/><stop offset="1" stop-color="#7a8190"/></linearGradient>
+  <linearGradient id="au" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a5a26"/><stop offset=".3" stop-color="#f5dc9e"/><stop offset=".55" stop-color="#b8893f"/><stop offset=".8" stop-color="#ffe9b5"/><stop offset="1" stop-color="#8b6a2f"/></linearGradient>
+  <radialGradient id="sapph" cx=".35" cy=".3"><stop offset="0" stop-color="#cfe0ff"/><stop offset=".35" stop-color="#4f7fe8"/><stop offset="1" stop-color="#0d1f5c"/></radialGradient>
+</defs></svg>
+<div class="wp-site-blocks">
+<header class="wp-block-template-part site-header" id="hdr"><div class="inner alignwide has-global-padding">
+  <a href="#" class="wp-block-site-title" aria-label="Celeste home">CELESTE</a>
+  <nav class="wp-block-navigation" aria-label="Primary"><a href="#shop">Shop</a><a href="#studio">Engraving</a><a href="#workshop">Workshop</a></nav>
+  <a href="#shop" class="wc-block-mini-cart">Cart <b id="cc">0</b></a>
+</div></header>
+
+<main>
+<section class="wp-block-cover hero" aria-labelledby="hH">
+  <video class="wp-block-cover__video-background" id="heroVideo" muted loop playsinline preload="auto" aria-hidden="true" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_064122_c4750c0e-7476-4b44-94a2-a85a65c63bf2.mp4"></video>
+  <span class="wp-block-cover__background" aria-hidden="true"></span>
+  <div class="wp-block-cover__inner-container alignwide has-global-padding">
+    <p class="kicker reveal">Recycled silver · Lab-grown sapphire</p>
+    <h1 id="hH" class="wp-block-heading reveal">A little night sky, <em>to keep.</em></h1>
+    <p class="lead reveal">Silver and sapphire pieces made in our London workshop, and engraved by hand with the words that matter to you.</p>
+    <div class="wp-block-buttons reveal"><div class="wp-block-button is-style-fill"><a class="wp-block-button__link" href="#studio">Design your engraving</a></div><div class="wp-block-button is-style-outline"><a class="wp-block-button__link" href="#shop">Shop the collection</a></div></div>
+  </div>
+  <div class="hero-foot alignwide has-global-padding" style="max-width:none"><span>Hatton Garden, London</span><span>Free engraving · free returns</span></div>
+</section>
+
+<section class="section alignwide has-global-padding" id="shop" aria-labelledby="sH">
+  <div class="section-head reveal"><div><p class="kicker">The collection</p><h2 id="sH" class="wp-block-heading" style="margin-top:14px">Three pieces, <em>one sky.</em></h2></div><p>Each one is set with a lab-grown sapphire: the same stone as a mined one, without the mine.</p></div>
+  <ul class="wc-block-grid__products">
+    <li class="wc-block-grid__product reveal"><div class="wc-block-grid__product-image"><span class="glint"></span><img src="products/disc.webp" alt="Nocturne Disc pendant in silver with a sapphire" loading="lazy"></div><h3 class="wc-block-grid__product-title">Nocturne Disc</h3><p class="wc-block-grid__product-meta">Engravable pendant · 45 cm</p><p class="wc-block-grid__product-price">£240</p><button class="add_to_cart_button">Add to cart</button></li>
+    <li class="wc-block-grid__product reveal"><div class="wc-block-grid__product-image"><span class="glint"></span><img src="products/polaris.webp" alt="Polaris solitaire ring with a sapphire" loading="lazy"></div><h3 class="wc-block-grid__product-title">Polaris Ring</h3><p class="wc-block-grid__product-meta">Solitaire band · sizes J–S</p><p class="wc-block-grid__product-price">£310</p><button class="add_to_cart_button">Add to cart</button></li>
+    <li class="wc-block-grid__product reveal"><div class="wc-block-grid__product-image"><span class="glint"></span><img src="products/comet.webp" alt="Comet Drops sapphire earrings" loading="lazy"></div><h3 class="wc-block-grid__product-title">Comet Drops</h3><p class="wc-block-grid__product-meta">Earrings · pair</p><p class="wc-block-grid__product-price">£280</p><button class="add_to_cart_button">Add to cart</button></li>
+  </ul>
+</section>
+
+<section class="section alignwide has-global-padding" id="studio" style="padding-top:0" aria-labelledby="eH">
+  <div class="studio reveal">
+    <div class="studio-preview" aria-live="polite">
+      <div class="eng-stage">
+        <img id="engImg" src="products/engrave-silver.webp" alt="Preview of your engraved Nocturne Disc">
+        <svg viewBox="0 0 1000 1250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <text id="engraving" x="500" y="690" text-anchor="middle" fill="#2a3040" fill-opacity=".7" font-family="EB Garamond" font-size="143" stroke="#fff" stroke-opacity=".35" stroke-width="2" style="paint-order:stroke">Ada</text>
+          <text id="engraving2" x="500" y="828" text-anchor="middle" fill="#2a3040" fill-opacity=".55" font-family="Jost" font-size="42" letter-spacing="13">12 · 06 · 2026</text>
+        </svg>
+      </div>
+      <span class="caption">NOCTURNE DISC · 30 MM · ENLARGED TO SHOW DETAIL</span>
+    </div>
+    <div class="studio-form">
+      <p class="kicker">Engraving studio</p>
+      <h2 id="eH" class="wp-block-heading" style="margin-top:14px">Write it. <em>See it.</em></h2>
+      <p class="intro">Type a name, a date or a word. We engrave it by hand with a diamond point, and it costs nothing extra.</p>
+      <div class="field"><label for="txt"><span>Front: name or word</span><span id="cnt">3 / 12</span></label><input type="text" id="txt" maxlength="12" value="Ada" autocomplete="off"></div>
+      <div class="field"><label for="dt"><span>Below: a date (optional)</span></label><input type="text" id="dt" maxlength="16" value="12 · 06 · 2026" autocomplete="off" style="font-family:var(--sans);font-size:17px;letter-spacing:.12em"></div>
+      <div class="field"><span class="lbl">Lettering</span><div class="seg" role="group" aria-label="Lettering style"><button data-style="serif" aria-pressed="true">Aa</button><button data-style="script" aria-pressed="false">Aa</button><button data-style="block" aria-pressed="false">AA</button></div></div>
+      <div class="field"><span class="lbl">Metal</span><div class="metal-row" role="group" aria-label="Metal"><button data-metal="ag" aria-pressed="true" aria-label="Sterling silver" style="background:linear-gradient(135deg,#7d828a,#f1f3f6 45%,#8b9098)"></button><button data-metal="au" aria-pressed="false" aria-label="Gold vermeil" style="background:linear-gradient(135deg,#8a6a33,#f3d79a 45%,#9b7638)"></button></div></div>
+      <div class="studio-total"><div class="price"><span id="price">£240</span><small>Engraving included · ships in 5 days</small></div><div class="wp-block-button is-style-fill"><button class="wp-block-button__link" id="addEng">Add to cart</button></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section alignwide has-global-padding" id="workshop" style="padding-top:0" aria-labelledby="wH">
+  <div class="reveal"><p class="kicker">The workshop</p><h2 id="wH" class="wp-block-heading" style="margin-top:14px">Small bench, <em>long memory.</em></h2></div>
+  <div class="story">
+    <div class="reveal"><b>1926</b><h3>Hatton Garden</h3><p>Our bench sits three floors above the street where London has cut stones for a century.</p></div>
+    <div class="reveal"><b>100%</b><h3>Recycled silver</h3><p>Refined from old cutlery, film and circuit boards, then hallmarked at the London Assay Office.</p></div>
+    <div class="reveal"><b>By hand</b><h3>Diamond-point engraving</h3><p>No lasers. Every letter is cut by hand, so no two engravings are quite the same.</p></div>
+  </div>
+</section>
+
+<section class="cta has-global-padding" aria-labelledby="cH">
+  <p class="kicker reveal">Gifting</p>
+  <h2 id="cH" class="wp-block-heading reveal">For the person who <em>is your sky.</em></h2>
+  <p class="reveal">Order by 18 December for Christmas delivery. Every piece arrives in a navy linen box with a handwritten card.</p>
+  <div class="wp-block-buttons reveal"><div class="wp-block-button is-style-fill"><a class="wp-block-button__link" href="#studio">Start an engraving</a></div><div class="wp-block-button is-style-outline"><a class="wp-block-button__link" href="#">Book a workshop visit</a></div></div>
+</section>
+</main>
+
+<footer class="wp-block-template-part site-footer"><div class="alignwide has-global-padding">
+  <div class="cols">
+    <div><span class="wp-block-site-title" style="font-size:24px">CELESTE</span><p style="margin-top:12px;max-width:22rem">Silver and sapphire jewelry, engraved by hand in Hatton Garden.</p></div>
+    <div><h4>Shop</h4><ul><li><a href="#shop">Necklaces</a></li><li><a href="#shop">Rings</a></li><li><a href="#shop">Earrings</a></li></ul></div>
+    <div><h4>Service</h4><ul><li><a href="#studio">Engraving</a></li><li><a href="#">Ring sizing</a></li><li><a href="#">Aftercare</a></li></ul></div>
+    <div><h4>Help</h4><ul><li><a href="#">Delivery</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact</a></li></ul></div>
+  </div>
+  <p class="legal">© 2026 Celeste Jewellery Ltd · Hallmarked in London</p>
+</div></footer>
+</div>
+<script>
+(() => {
+  const d = document; d.body.classList.remove('no-js');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const v = d.getElementById('heroVideo');
+  if (!reduce) { v.addEventListener('loadeddata', () => { v.classList.add('ready'); v.play().catch(()=>{}); }, {once:true}); v.load(); } else v.removeAttribute('src');
+
+  /* engraving preview */
+  const txt = d.getElementById('txt'), dt = d.getElementById('dt'), eng = d.getElementById('engraving'), eng2 = d.getElementById('engraving2'), cnt = d.getElementById('cnt');
+  const FONTS = {serif:{f:'EB Garamond', s:143, ls:0, up:false}, script:{f:'Pinyon Script', s:168, ls:0, up:false}, block:{f:'Jost', s:98, ls:20, up:true}};
+  let style = 'serif', metal = 'ag';
+  function draw(){
+    const F = FONTS[style], raw = txt.value.trim() || 'Your name', t = F.up ? raw.toUpperCase() : raw;
+    const size = Math.max(58, Math.min(F.s, F.s * 7 / Math.max(7, t.length)));
+    eng.textContent = t; eng.setAttribute('font-family', F.f); eng.setAttribute('font-size', size.toFixed(0)); eng.setAttribute('letter-spacing', F.ls);
+    eng2.textContent = dt.value; cnt.textContent = `${txt.value.length} / 12`;
+  }
+  txt.addEventListener('input', draw); dt.addEventListener('input', draw);
+  d.querySelectorAll('[data-style]').forEach(b => b.onclick = () => { style = b.dataset.style; d.querySelectorAll('[data-style]').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); });
+  d.querySelectorAll('[data-metal]').forEach(b => b.onclick = () => { metal = b.dataset.metal; d.querySelectorAll('[data-metal]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    d.getElementById('engImg').src = `products/engrave-${metal === 'au' ? 'gold' : 'silver'}.webp`;
+    eng.setAttribute('fill', metal === 'au' ? '#4a3210' : '#2a3040'); eng2.setAttribute('fill', metal === 'au' ? '#4a3210' : '#2a3040');
+    d.getElementById('price').textContent = metal === 'au' ? '£290' : '£240'; });
+  d.fonts && d.fonts.ready.then(draw); draw();
+
+  let count = 0; const cc = d.getElementById('cc');
+  const flash = (b, label) => { cc.textContent = ++count; const o = b.textContent; b.classList.add('added'); b.textContent = label; setTimeout(() => { b.classList.remove('added'); b.textContent = o; }, 1500); };
+  d.querySelectorAll('.add_to_cart_button').forEach(b => b.onclick = () => flash(b, 'Added ✓'));
+  d.getElementById('addEng').onclick = e => flash(e.currentTarget, `Added: “${txt.value || 'blank'}”`);
+
+  addEventListener('scroll', () => d.getElementById('hdr').classList.toggle('scrolled', scrollY > 40), {passive:true});
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { const sib = [...e.target.parentElement.children]; e.target.style.transitionDelay = Math.min(sib.indexOf(e.target),5)*.08 + 's'; e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.1});
+  d.querySelectorAll('.reveal').forEach(n => io.observe(n));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Product Studio</title>
+<style>html,body{margin:0;background:#222}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { products } from './products.js';
+import { buildSet } from './sets.js';
+
+const W = 1000, H = 1250;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.VSMShadowMap;
+document.body.appendChild(renderer.domElement);
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+function backdrop(bg){ // studio sweep: lighter centre falling off to the tint
+  const c = document.createElement('canvas'); c.width = 500; c.height = 625; const g = c.getContext('2d');
+  const grad = g.createRadialGradient(250, 300, 20, 250, 330, 520);
+  grad.addColorStop(0, bg.hi || bg.base); grad.addColorStop(1, bg.base);
+  g.fillStyle = grad; g.fillRect(0, 0, 500, 625);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+window.THREE = THREE; window.RoundedBoxGeometry = RoundedBoxGeometry;
+window.renderProduct = async (id) => {
+  const spec = products[id]; if (!spec) throw new Error('no product ' + id);
+  const scene = new THREE.Scene();
+  scene.environment = envTex;
+  const obj = await spec.build(THREE, { RoundedBoxGeometry });
+  obj.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+  if (!spec.hang) { const b0 = new THREE.Box3().setFromObject(obj); obj.position.y -= b0.min.y; }
+  let frameObjs = [obj];
+  if (spec.scene) {
+    const r = buildSet(scene, obj, spec.scene, !!spec.hang); frameObjs = r.frame;
+  } else { // plain backdrop (legacy packshot)
+    scene.background = backdrop(spec.bg); scene.environmentIntensity = spec.env ?? 1;
+    const key = new THREE.DirectionalLight(0xffffff, spec.key ?? 2.2);
+    key.position.set(-1.6, 7, 3.2); key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.left = -3; key.shadow.camera.right = 3; key.shadow.camera.top = 3; key.shadow.camera.bottom = -3; key.shadow.radius = 14; key.shadow.blurSamples = 24; key.shadow.bias = -0.0005;
+    scene.add(key);
+    const rim = new THREE.DirectionalLight(0xffffff, spec.rim ?? 1.2); rim.position.set(3, 2, -3); scene.add(rim);
+    if (!spec.hang) { const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.ShadowMaterial({ opacity: spec.shadow ?? 0.22 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor); }
+  }
+  scene.add(obj);
+  // frame the product (+ its pedestal)
+  const box = new THREE.Box3(); frameObjs.forEach(o => box.expandByObject(o));
+  const S = spec.scene || {};
+  const size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+  const cam = new THREE.PerspectiveCamera(spec.fov ?? 26, W / H, 0.1, 200);
+  const elev = spec.elev ?? S.elev ?? 0.18, fill = spec.sceneFill ?? S.fill ?? spec.fill ?? 0.62;
+  const fitH = size.y / fill, fitW = size.x / (fill * W / H);
+  const dist = Math.max(fitH, fitW) / (2 * Math.tan(THREE.MathUtils.degToRad(cam.fov / 2))) + size.z / 2;
+  cam.position.set(ctr.x, ctr.y + dist * elev, ctr.z + dist);
+  cam.lookAt(ctr.x, ctr.y - size.y * (spec.drop ?? S.drop ?? 0.04), ctr.z);
+  renderer.render(scene, cam);
+  const url = renderer.domElement.toDataURL('image/webp', 0.9);
+  scene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach(mm => { if (mm.map) mm.map.dispose(); mm.dispose(); }); });
+  if (scene.background && scene.background.dispose) scene.background.dispose();
+  return url;
+};
+window.productIds = Object.keys(products);
+window.studioReady = true;
+</script>
+</body></html>
